@@ -12,4 +12,4 @@ As well as allowing user-to-user communication to establish broader rules and pr
 * guest rules
 * financial responsibilities
 
-We also strive to ensure our users' safety by conducting user screenings prior to registration.
+We also strive to ensure our users' safety by conducting user screenings prior to registration, as this will also increase confidence in the matching process and reduce some of the stress that comes with finding a suitable roommate.
