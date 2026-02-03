@@ -4,7 +4,9 @@ The purpose of CoHabit is to facilitate finding suitable roommates in a safe and
 * spacial preferences
 * location preferences
 * gender preferences 
+
 As well as allowing user-to-user communication to establish broader rules and preferences, such as:
+
 * cleanliness
 * sleep schedules
 * guest rules
