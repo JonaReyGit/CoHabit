@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/6/67/User_Avatar.png"
+const LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Noun_Project_house_icon_475319_cc_%28Wikiarabia_2022%29.svg/640px-Noun_Project_house_icon_475319_cc_%28Wikiarabia_2022%29.svg.png"
 
 function Navbar({ onSignOut }) {
   const navigate = useNavigate()
@@ -84,9 +85,14 @@ function Navbar({ onSignOut }) {
   return (
     <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
       <h1
-        className="text-xl font-bold cursor-pointer"
+        className="text-xl font-bold cursor-pointer inline-flex items-center gap-2"
         onClick={() => navigate('/dashboard')}
       >
+        <img 
+          src={LOGO}
+          alt="CoHabit Logo"
+          className="w-8 h-8 object-contain"
+        />
         CoHabit
       </h1>
 
