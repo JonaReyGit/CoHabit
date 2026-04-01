@@ -29,6 +29,20 @@ function ProfileSetup() {
   const [smoking, setSmoking] = useState(false)
   const [pets, setPets] = useState(false)
 
+  //dropdown for gender
+  const [genderOpen, setGenderOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setGenderOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
   async function saveProfile() {
     setError(null)
     setLoading(true)
@@ -123,15 +137,34 @@ function ProfileSetup() {
                 placeholder="Hi, I'm John!"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-              <input
-                type="text"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder=""
-              />
+            
+            <div className="relative inline-block" ref={dropdownRef}>
+              <button
+                type="button"
+                onCLick={() =>setGenderOpen(!genderOpen)}
+                className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-gray-400 hover:bg-black/10">
+                {gender}
+                <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="-mr-1 size-5 text-gray-400">
+                  <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" fillRule="evenodd" />
+                </svg>
+              </button>
+
+              {genderOpen && (
+                <div className="absolute right-0 z-10 mt-2 w-56 rounded-md bg-gray-800 outline outline-1 outline-white/10">
+                  <div className="py-1">
+                  {['Male', 'Female', 'Other', 'Prefer not to say'].map((option) => (
+                    <button
+                    key={option}
+                    type="button"
+                    onClick={() => {setGender(option); setGenderOpen(false)}} 
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
