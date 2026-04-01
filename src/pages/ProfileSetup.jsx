@@ -130,7 +130,7 @@ function ProfileSetup() {
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Hi, I'm John!"
+                placeholder=""
               />
             </div>
             <div>
@@ -140,7 +140,7 @@ function ProfileSetup() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="(***) - *** - ***"
+                placeholder="(***) - *** - ****"
               />
             </div>
             <div>
