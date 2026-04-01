@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -40,7 +40,12 @@ function ProfileSetup() {
       .from('profiles')
       .update({
         full_name: fullName,
-        // TODO: add the rest of the profile fields here
+        bio: bio,
+        gender: gender,
+        phone: phone,
+        city: city,
+        state: state,
+        dob: dob
       })
       .eq('id', user.id)
 
@@ -107,6 +112,67 @@ function ProfileSetup() {
 
             {/* TODO: add inputs for bio, gender, phone, city, state, dob */}
             {/* just copy the same pattern as the full name input above */}
+            
+          <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Biography</label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setBio(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Hi, I'm John!"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <input
+                type="text"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Hi, I'm John!"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="(***) - *** - ***"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Your City"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <input
+                type="text"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Your State"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <input
+                type="text"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Month / Day / Year"
+              />
+            </div>
 
             <button
               type="submit"
