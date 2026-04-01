@@ -4,9 +4,12 @@ import Dashboard from './pages/Dashboard'
 import ProfileSetup from './pages/ProfileSetup'
 import ProtectedRoute from './components/ProtectedRoute'
 
+import Navbar from './components/shared/Navbar'
+
 function App() {
   return (
     <BrowserRouter>
+      <Navbar/>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/setup" element={
