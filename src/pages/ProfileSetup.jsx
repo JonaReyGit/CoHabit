@@ -7,6 +7,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Slider 
+} from '@/components/ui/slider' 
+import {
+  Checkbox
+} from '@/components/ui/checkbox'
+import {
+  Calendar, 
+  CalendarDayButton
+} from '@/components/ui/calendar'
 
 
 function ProfileSetup() {
@@ -259,6 +269,126 @@ function ProfileSetup() {
             {/* smoking and pets - checkboxes */}
             {/* move_in_date - date picker */}
             {/* preferred_location - text input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sleep Schedule</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="hover:cursor-pointer w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {sleepSchedule || 'Select sleep schedule'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Early Bird', 'Night Owl', 'Flexible'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setSleepSchedule(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Guest Frequency</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="hover:cursor-pointer w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {guestFrequency || 'Set guest frequency'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Never', 'Sometimes', 'Often', 'No Preference'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setGuestFrequency(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cleanliness: {cleanliness}/5
+              </label>
+              <Slider
+              className={"bg-gray-200 hover:cursor-grabbing hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
+                min={1}
+                max={5}
+                step={1}
+                value={[cleanliness]}
+                onValueChange={(val) => setCleanliness(val[0])}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+              Noise Level: {noiseLevel}/5
+              </label>
+              <Slider
+              className={"bg-gray-200 hover:cursor-grabbing hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
+                min={1}
+                max={5}
+                step={1}
+                value={[noiseLevel]}
+                onValueChange={(val) => setNoiseLevel(val[0])}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                className="hover:cursor-pointer"
+                id="smoking"
+                checked={smoking}
+                onCheckedChange={(val) => setSmoking(val)}
+              />
+              <label htmlFor="smoking" className="text-sm text-gray-700 cursor-pointer">
+                Smoking
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                className="hover:cursor-pointer"
+                id="pets"
+                checked={pets}
+                onCheckedChange={(val) => setPets(val)}
+              />
+              <label htmlFor="pets" className="text-sm text-gray-700 cursor-pointer">
+                Pets
+              </label>
+            </div>
+            <div>
+              <label>Date of Moving</label>
+              <Calendar
+              className="rounded-md border"
+              mode="single"
+              selected={moveInDate}
+              onSelect={setMoveInDate}
+            />
+            </div>
+            <div>
+              <label>Preferred Location</label>
+              <input
+              type="text"
+              value={preferredLocation}
+              onChange={(e) => setPreferredLocation(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder='Set your preferred location'
+              />
+            </div>
 
             <div className="flex gap-4">
               <button
