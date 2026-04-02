@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ProfileSetup from './pages/ProfileSetup'
+import Messages from './pages/Messages'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -10,13 +11,18 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/setup" element={
-          <ProtectedRoute>
+
             <ProfileSetup />
-          </ProtectedRoute>
+
         } />
         <Route path="/" element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <Messages />
           </ProtectedRoute>
         } />
         {/* anything else just goes to home */}

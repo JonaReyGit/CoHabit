@@ -1,6 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 function ProfileSetup() {
   const navigate = useNavigate()
@@ -131,41 +137,37 @@ function ProfileSetup() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Biography</label>
               <input
                 type="text"
-                value={fullName}
+                value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Hi, I'm John!"
               />
             </div>
-            
-            <div className="relative inline-block" ref={dropdownRef}>
-              <button
-                type="button"
-                onCLick={() =>setGenderOpen(!genderOpen)}
-                className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-gray-400 hover:bg-black/10">
-                {gender}
-                <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="-mr-1 size-5 text-gray-400">
-                  <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" fillRule="evenodd" />
-                </svg>
-              </button>
-
-              {genderOpen && (
-                <div className="absolute right-0 z-10 mt-2 w-56 rounded-md bg-gray-800 outline outline-1 outline-white/10">
-                  <div className="py-1">
-                  {['Male', 'Female', 'Other', 'Prefer not to say'].map((option) => (
-                    <button
-                    key={option}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
                     type="button"
-                    onClick={() => {setGender(option); setGenderOpen(false)}} 
-                    className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                    className="w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {gender || 'Select gender'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Male', 'Female', 'Other', 'Prefer not to say'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setGender(option)}
                     >
                       {option}
-                    </button>
+                    </DropdownMenuItem>
                   ))}
-                  </div>
-                </div>
-              )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
               <input
