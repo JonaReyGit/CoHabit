@@ -12,7 +12,7 @@ create table public.preferences (
   -- e.g. 'early_bird', 'night_owl', 'flexible'
   sleep_schedule     text,
   -- e.g. 'never', 'sometimes', 'often'
-  guests_frequency   text,
+  guest_frequency   text,
   smoking            boolean,
   pets               boolean,
   -- array of tags the user will not tolerate, e.g. '{smoking,loud_music}'

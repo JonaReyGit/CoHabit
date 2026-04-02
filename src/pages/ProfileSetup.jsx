@@ -41,8 +41,8 @@ function ProfileSetup() {
   const [moveInDate, setMoveInDate] = useState('')
   const [cleanliness, setCleanliness] = useState(3)
   const [noiseLevel, setNoiseLevel] = useState(3)
-  const [sleepSchedule, setSleepSchedule] = useState('')
-  const [guestFrequency, setGuestFrequency] = useState('')
+  const [sleep_schedule, setSleepSchedule] = useState('')
+  const [guests_frequency, setGuestFrequency] = useState('')
   const [smoking, setSmoking] = useState(false)
   const [pets, setPets] = useState(false)
 
@@ -106,8 +106,8 @@ function ProfileSetup() {
         move_in_date: moveInDate || null,
         cleanliness: cleanliness || null,
         noise_level: noiseLevel || null,
-        sleep_schedule: sleepSchedule || null,
-        guest_frequency: guestFrequency || null,
+        sleep_schedule: sleep_schedule || null,
+        guests_frequency: guests_frequency || null,
         smoking: smoking || null,
         pets: pets || null,
         
@@ -277,7 +277,7 @@ function ProfileSetup() {
                     type="button"
                     className="hover:cursor-pointer w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                   >
-                    {sleepSchedule || 'Select sleep schedule'}
+                    {sleep_schedule || 'Select sleep schedule'}
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-full bg-white">
@@ -302,7 +302,7 @@ function ProfileSetup() {
                     type="button"
                     className="hover:cursor-pointer w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                   >
-                    {guestFrequency || 'Set guest frequency'}
+                    {guests_frequency || 'Set guest frequency'}
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-full bg-white">
