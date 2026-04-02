@@ -5,9 +5,12 @@ import ProfileSetup from './pages/ProfileSetup'
 import Messages from './pages/Messages'
 import ProtectedRoute from './components/ProtectedRoute'
 
+import Navbar from './components/shared/Navbar'
+
 function App() {
   return (
     <BrowserRouter>
+      <Navbar/>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/setup" element={
