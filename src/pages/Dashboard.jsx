@@ -2,109 +2,98 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
+const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/6/67/User_Avatar.png"
+
 
 function Dashboard() {
-  const [email, setEmail] = useState('')
   const navigate = useNavigate()
 
+  const [profile, setProfile] = useState({  name: 'Guest',
+                                            email: 'placeholder@gmail.com',
+                                            picture: DEFAULT_AVATAR,
+                                            city: 'City',
+                                            state: 'State'
+  })
+
   useEffect(() => {
-    // get the current user info to display their email
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setEmail(session.user.email)
+    const getUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // no one is logged in
+      if (!user){ 
+        navigate('/login')
+        return
       }
-    })
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name, email, avatar_url, location_city, location_state')
+        .eq('id', user.id)
+        .single()
+
+      if (!error && data) {
+        setProfile({
+          name: data.full_name || 'No Name Provided',
+          email: data.email,
+          picture: data.avatar_url || DEFAULT_AVATAR,
+          city: data.location_city || 'City',
+          state: data.location_state || 'State',
+        })
+      }
+    }
+
+    getUserProfile()
   }, [])
 
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    navigate('/login')
-  }
 
-  return (
+return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <header className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-5">
+          Welcome Back {profile.name}!
+        </h1>
+        <h2 className="text-gray-500">
+          Lets find you some compatible roommates through smart matching
+        </h2>
+      </header>
 
       <div className="bg-white rounded-lg shadow p-8 text-center">
-        {/* <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-        <p className="text-gray-600 mb-6">Logged in as <span className="font-medium">{email}</span></p> */}
-        
-
-        {/* Header */}
-        <header className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <button
-          onClick={handleSignOut}
-          className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        <div className="flex gap-6 justify-center flex-wrap">
+          <div
+            className="border border-gray-200 rounded-xl p-6 w-72 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate('/profile')}
           >
-          Sign Out
-          </button>
-        </header>
+            <p className="font-bold text-center mb-3 ">Account Settings</p>
+            <div className="flex items-center gap-6">
+              <img
+                src={profile.picture}
+                alt="Profile"
+                className="w-16 h-16 rounded object-cover bg-gray-200"
+                onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR }}
+              />
+              <div className="flex flex-col text-left text-sm">
+                <span className="font-medium text-gray-700">{profile.name}</span>
+                <span className="text-gray-400">{profile.city}, {profile.state}</span>
+              </div>
+            </div>
+          </div>
 
-        <p className="text-gray-600 mb-6">Logged in as <span className="font-medium">{email}</span></p>
-
-
-
-
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <button
-            onClick={() => navigate('/login')}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+          <div
+            className="border border-gray-200 rounded-xl p-6 w-72 cursor-pointer hover:shadow-md transition-shadow text-left"
+            onClick={() => navigate('/messaging')}
           >
-            Login
-          </button>
+            <p className="font-bold mb-3 text-center">My Messages</p>
+            <p className="text-gray-500 text-sm">Lets See Who Wants to Chat!</p>
+          </div>
 
-          <button
-            onClick={() => navigate('/')}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+          <div
+            className="border border-gray-200 rounded-xl p-6 w-72 cursor-pointer hover:shadow-md transition-shadow text-left"
+            onClick={() => navigate('/matching')}
           >
-            Root
-          </button>
-
-          <button
-            onClick={() => navigate('/profilesetup')}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-          >
-            Dashboard
-          </button>
+            <p className="font-bold mb-3 text-center">Start CoHabiting</p>
+            <p className="text-gray-500 text-sm">Lets get you connected!</p>
+          </div>
         </div>
-
-
-      {/* Table */}
-      <div className="bg-white rounded-2xl shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Recent Users</h2>
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2">Name</th>
-              <th className="py-2">Email</th>
-              <th className="py-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { name: "John Doe", email: "john@example.com", status: "Active" },
-              { name: "Jane Smith", email: "jane@example.com", status: "Inactive" },
-              { name: "Sam Wilson", email: "sam@example.com", status: "Active" },
-            ].map((user, i) => (
-              <tr key={i} className="border-b hover:bg-gray-50">
-                <td className="py-2">{user.name}</td>
-                <td className="py-2">{user.email}</td>
-                <td className="py-2">
-                  <span className={`px-3 py-1 rounded-full text-sm ${user.status === "Active" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}>
-                    {user.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-
-
-
-        
       </div>
     </div>
   )
