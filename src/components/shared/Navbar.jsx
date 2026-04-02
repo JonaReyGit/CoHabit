@@ -7,15 +7,31 @@ const LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Noun_Pro
 
 function Navbar({ onSignOut }) {
   const navigate = useNavigate()
+
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
 
+
+  // dark mode
+  const [darkMode, setDarkMode] = useState(
+    () => document.documentElement.classList.contains('dark')
+  )
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode
+    setDarkMode(newMode)
+    document.documentElement.classList.toggle('dark', newMode)
+    localStorage.setItem('theme', newMode ? 'dark' : 'light')
+  }
+  
+
+
+  // get user profile from Supabase
   const [profile, setProfile] = useState({  name: 'Guest',
                                             email: 'placeholder@gmail.com',
                                             picture: DEFAULT_AVATAR,
   })
 
-  // Fetch user profile from Supabase
   const getUserProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -83,7 +99,9 @@ function Navbar({ onSignOut }) {
   }
 
   return (
-    <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
+    <nav className="  bg-gray-200 dark:bg-gray-900
+                      text-black dark:text-white 
+                      shadow-md px-6 py-4 flex justify-between items-center">
       <h1
         className="text-xl font-bold cursor-pointer inline-flex items-center gap-2"
         onClick={() => navigate('/dashboard')}
@@ -104,6 +122,7 @@ function Navbar({ onSignOut }) {
         >
           Dashboard
         </button>
+
 
         {/* the hamburger icon */}
         <div className="relative" ref={dropdownRef}>
@@ -131,7 +150,10 @@ function Navbar({ onSignOut }) {
 
         {/* when the dropdown is clicked and open */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-60 bg-white border rounded-lg shadow-lg z-50">
+            <div className="absolute right-0 mt-2 w-60 
+                          bg-white dark:bg-gray-800 
+                            border dark:border-gray-700 
+                            rounded-lg shadow-lg z-50">
               {/* Profile header */}
               <div className="p-3 border-b flex items-center gap-3">
                 <img
@@ -151,7 +173,8 @@ function Navbar({ onSignOut }) {
                 <li>
                   <button
                     onClick={() => navTo('/dashboard')}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    className=" w-full text-left px-4 py-2 
+                              hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Dashboard
                   </button>
@@ -160,7 +183,8 @@ function Navbar({ onSignOut }) {
                 <li>
                   <button
                     onClick={() => navTo('/matching')}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    className=" w-full text-left px-4 py-2 
+                              hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Matching
                   </button>
@@ -169,7 +193,8 @@ function Navbar({ onSignOut }) {
                 <li>
                   <button
                     onClick={() => navTo('/messaging')}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    className=" w-full text-left px-4 py-2 
+                              hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Messaging
                   </button>
@@ -178,7 +203,8 @@ function Navbar({ onSignOut }) {
                 <li>
                   <button
                     onClick={() => navTo('/profile')}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    className=" w-full text-left px-4 py-2 
+                              hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Profile
                   </button>
@@ -188,7 +214,9 @@ function Navbar({ onSignOut }) {
                   <hr className="border-t" />
                   <button
                     onClick={handleSignOut}
-                    className="w-full py-2 hover:bg-red-100 text-red-600 font-medium"
+                    className=" w-full py-2 
+                              hover:bg-red-100 dark:hover:bg-red-200
+                              text-red-600 font-medium"
                   >
                     Sign Out
                   </button>
@@ -197,6 +225,36 @@ function Navbar({ onSignOut }) {
             </div>
           )}
         </div>
+
+        {/* dark mode slider */}
+        <button
+          onClick={toggleDarkMode}
+          className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300
+            ${darkMode ? 'bg-blue-900' : 'bg-amber-100'}`}
+        >
+          <div
+            className={`w-6 h-6 rounded-full shadow-md transform transition duration-300 flex items-center justify-center
+              ${darkMode ? 'translate-x-6 bg-gray-900' : 'translate-x-0 bg-white'}`}
+          >
+            {darkMode ? (
+              // moon icon
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                strokeWidth={2} stroke="white" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M21.752 15.002A9.718 9.718 0 0 1 12 21c-5.385 0-9.75-4.365-9.75-9.75 0-4.246 2.69-7.864 6.48-9.243.313-.114.664.12.62.457a7.5 7.5 0 0 0 9.786 9.786c.337-.044.571.307.457.62a9.751 9.751 0 0 1-1.84 3.132Z"
+                />
+              </svg>
+            ) : (
+              // sun icon
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                strokeWidth={2} stroke="#1f2937" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                />
+              </svg>
+            )}
+          </div>
+        </button>
       </div>
     </nav>
   )
