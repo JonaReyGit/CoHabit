@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+
 function ProfileSetup() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1) // 1 = profile, 2 = preferences
@@ -19,9 +20,9 @@ function ProfileSetup() {
   const [bio, setBio] = useState('')
   const [gender, setGender] = useState('')
   const [phone, setPhone] = useState('')
-  const [city, setCity] = useState('')
-  const [state, setState] = useState('')
-  const [dob, setDob] = useState('')
+  const [location_city, setCity] = useState('')
+  const [location_state, setState] = useState('')
+  const [date_of_birth, setDob] = useState('')
 
   // preferences stuff
   const [budgetMin, setBudgetMin] = useState('')
@@ -31,11 +32,11 @@ function ProfileSetup() {
   const [cleanliness, setCleanliness] = useState(3)
   const [noiseLevel, setNoiseLevel] = useState(3)
   const [sleepSchedule, setSleepSchedule] = useState('')
-  const [guestsFrequency, setGuestsFrequency] = useState('')
+  const [guestFrequency, setGuestFrequency] = useState('')
   const [smoking, setSmoking] = useState(false)
   const [pets, setPets] = useState(false)
 
-  //dropdown for gender
+  //dropdown logic for gender
   const [genderOpen, setGenderOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -63,9 +64,9 @@ function ProfileSetup() {
         bio: bio,
         gender: gender,
         phone: phone,
-        city: city,
-        state: state,
-        dob: dob
+        location_city: location_city,
+        location_state: location_state,
+        date_of_birth: date_of_birth
       })
       .eq('id', user.id)
 
@@ -91,7 +92,15 @@ function ProfileSetup() {
         user_id: user.id,
         budget_min: budgetMin || null,
         budget_max: budgetMax || null,
-        // TODO: add the rest of the preference fields here
+        preferred_location: preferredLocation || null,
+        move_in_date: moveInDate || null,
+        cleanliness: cleanliness || null,
+        noise_level: noiseLevel || null,
+        sleep_schedule: sleepSchedule || null,
+        guest_frequency: guestFrequency || null,
+        smoking: smoking || null,
+        pets: pets || null,
+        
       })
 
     if (err) {
@@ -182,7 +191,7 @@ function ProfileSetup() {
               <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
               <input
                 type="text"
-                value={city}
+                value={location_city}
                 onChange={(e) => setCity(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Your City"
@@ -192,7 +201,7 @@ function ProfileSetup() {
               <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
               <input
                 type="text"
-                value={state}
+                value={location_state}
                 onChange={(e) => setState(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Your State"
@@ -202,7 +211,7 @@ function ProfileSetup() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
               <input
                 type="text"
-                value={dob}
+                value={date_of_birth}
                 onChange={(e) => setDob(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Month / Day / Year"
