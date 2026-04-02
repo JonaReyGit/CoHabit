@@ -11,7 +11,9 @@ import Navbar from './components/shared/Navbar'
 function App() {
   return (
     <BrowserRouter>
-      <Navbar/>
+      <ProtectedRoute>
+        <Navbar/>
+      </ProtectedRoute>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/setup" element={
