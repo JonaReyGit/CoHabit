@@ -1,6 +1,23 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Slider 
+} from '@/components/ui/slider' 
+import {
+  Checkbox
+} from '@/components/ui/checkbox'
+import {
+  Calendar, 
+  CalendarDayButton
+} from '@/components/ui/calendar'
+
 
 function ProfileSetup() {
   const navigate = useNavigate()
@@ -13,9 +30,9 @@ function ProfileSetup() {
   const [bio, setBio] = useState('')
   const [gender, setGender] = useState('')
   const [phone, setPhone] = useState('')
-  const [city, setCity] = useState('')
-  const [state, setState] = useState('')
-  const [dob, setDob] = useState('')
+  const [location_city, setCity] = useState('')
+  const [location_state, setState] = useState('')
+  const [date_of_birth, setDob] = useState('')
 
   // preferences stuff
   const [budgetMin, setBudgetMin] = useState('')
@@ -24,10 +41,24 @@ function ProfileSetup() {
   const [moveInDate, setMoveInDate] = useState('')
   const [cleanliness, setCleanliness] = useState(3)
   const [noiseLevel, setNoiseLevel] = useState(3)
-  const [sleepSchedule, setSleepSchedule] = useState('')
-  const [guestsFrequency, setGuestsFrequency] = useState('')
+  const [sleep_schedule, setSleepSchedule] = useState('')
+  const [guests_frequency, setGuestFrequency] = useState('')
   const [smoking, setSmoking] = useState(false)
   const [pets, setPets] = useState(false)
+
+  //dropdown logic for gender
+  const [genderOpen, setGenderOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setGenderOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   async function saveProfile() {
     setError(null)
@@ -40,7 +71,12 @@ function ProfileSetup() {
       .from('profiles')
       .update({
         full_name: fullName,
-        // TODO: add the rest of the profile fields here
+        bio: bio,
+        gender: gender,
+        phone: phone,
+        location_city: location_city,
+        location_state: location_state,
+        date_of_birth: date_of_birth
       })
       .eq('id', user.id)
 
@@ -66,7 +102,15 @@ function ProfileSetup() {
         user_id: user.id,
         budget_min: budgetMin || null,
         budget_max: budgetMax || null,
-        // TODO: add the rest of the preference fields here
+        preferred_location: preferredLocation || null,
+        move_in_date: moveInDate || null,
+        cleanliness: cleanliness || null,
+        noise_level: noiseLevel || null,
+        sleep_schedule: sleep_schedule || null,
+        guests_frequency: guests_frequency || null,
+        smoking: smoking || null,
+        pets: pets || null,
+        
       })
 
     if (err) {
@@ -107,6 +151,82 @@ function ProfileSetup() {
 
             {/* TODO: add inputs for bio, gender, phone, city, state, dob */}
             {/* just copy the same pattern as the full name input above */}
+            
+          <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Biography</label>
+              <input
+                type="text"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Hi, I'm John!"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {gender || 'Select gender'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Male', 'Female', 'Other', 'Prefer not to say'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setGender(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="(***) - *** - ****"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <input
+                type="text"
+                value={location_city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Your City"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <input
+                type="text"
+                value={location_state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Your State"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <input
+                type="text"
+                value={date_of_birth}
+                onChange={(e) => setDob(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Month / Day / Year"
+              />
+            </div>
 
             <button
               type="submit"
@@ -149,6 +269,126 @@ function ProfileSetup() {
             {/* smoking and pets - checkboxes */}
             {/* move_in_date - date picker */}
             {/* preferred_location - text input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sleep Schedule</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="hover:cursor-pointer w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {sleep_schedule || 'Select sleep schedule'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Early Bird', 'Night Owl', 'Flexible'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setSleepSchedule(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Guest Frequency</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="hover:cursor-pointer w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {guests_frequency || 'Set guest frequency'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Never', 'Sometimes', 'Often', 'No Preference'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setGuestFrequency(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cleanliness: {cleanliness}/5
+              </label>
+              <Slider
+              className={"bg-gray-200 hover:cursor-grabbing hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
+                min={1}
+                max={5}
+                step={1}
+                value={[cleanliness]}
+                onValueChange={(val) => setCleanliness(val[0])}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+              Noise Level: {noiseLevel}/5
+              </label>
+              <Slider
+              className={"bg-gray-200 hover:cursor-grabbing hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
+                min={1}
+                max={5}
+                step={1}
+                value={[noiseLevel]}
+                onValueChange={(val) => setNoiseLevel(val[0])}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                className="hover:cursor-pointer"
+                id="smoking"
+                checked={smoking}
+                onCheckedChange={(val) => setSmoking(val)}
+              />
+              <label htmlFor="smoking" className="text-sm text-gray-700 cursor-pointer">
+                Smoking
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                className="hover:cursor-pointer"
+                id="pets"
+                checked={pets}
+                onCheckedChange={(val) => setPets(val)}
+              />
+              <label htmlFor="pets" className="text-sm text-gray-700 cursor-pointer">
+                Pets
+              </label>
+            </div>
+            <div>
+              <label>Date of Moving</label>
+              <Calendar
+              className="rounded-md border"
+              mode="single"
+              selected={moveInDate}
+              onSelect={setMoveInDate}
+            />
+            </div>
+            <div>
+              <label>Preferred Location</label>
+              <input
+              type="text"
+              value={preferredLocation}
+              onChange={(e) => setPreferredLocation(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder='Set your preferred location'
+              />
+            </div>
 
             <div className="flex gap-4">
               <button
