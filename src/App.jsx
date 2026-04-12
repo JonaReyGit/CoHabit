@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ProfileSetup from './pages/ProfileSetup'
+import AccountSettings from './pages/AccountSettings'
 import Messages from './pages/Messages'
 import Matching from './pages/Matching'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -17,13 +18,18 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/setup" element={
-
+          <ProtectedRoute>
             <ProfileSetup />
-
+          </ProtectedRoute>
         } />
         <Route path="/" element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <AccountSettings />
           </ProtectedRoute>
         } />
         <Route path="/messages" element={

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
@@ -26,7 +26,7 @@ function ProfileSetup() {
   const [error, setError] = useState(null)
 
   // profile stuff
-  const [fullName, setFullName] = useState('')
+  const [full_name, setFullName] = useState('')
   const [bio, setBio] = useState('')
   const [gender, setGender] = useState('')
   const [phone, setPhone] = useState('')
@@ -70,7 +70,7 @@ function ProfileSetup() {
     const { error: err } = await supabase
       .from('profiles')
       .update({
-        full_name: fullName,
+        full_name: full_name,
         bio: bio,
         gender: gender,
         phone: phone,
@@ -142,7 +142,7 @@ function ProfileSetup() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
               <input
                 type="text"
-                value={fullName}
+                value={full_name}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="John Doe"
