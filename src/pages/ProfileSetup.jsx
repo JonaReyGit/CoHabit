@@ -148,9 +148,6 @@ function ProfileSetup() {
                 placeholder="John Doe"
               />
             </div>
-
-            {/* TODO: add inputs for bio, gender, phone, city, state, dob */}
-            {/* just copy the same pattern as the full name input above */}
             
           <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Biography</label>
@@ -262,13 +259,6 @@ function ProfileSetup() {
               </div>
             </div>
 
-            {/* TODO: add the rest of the preference inputs */}
-            {/* sleep_schedule - could be a dropdown (early bird, night owl, flexible) */}
-            {/* guests_frequency - dropdown (never, sometimes, often) */}
-            {/* cleanliness and noise_level - maybe a 1-5 slider or just number input */}
-            {/* smoking and pets - checkboxes */}
-            {/* move_in_date - date picker */}
-            {/* preferred_location - text input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sleep Schedule</label>
               <DropdownMenu>
