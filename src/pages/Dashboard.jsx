@@ -111,7 +111,7 @@ return (
                       bg-white dark:bg-gray-500
                       hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow 
                       text-left"
-          onClick={() => navigate('/messaging')}
+          onClick={() => navigate('/messages')}
         >
           <p className="font-bold mb-3 text-center text-black dark:text-white">My Messages</p>
           <p className="text-gray-700 dark:text-gray-900 text-sm">Lets See Who Wants to Chat!</p>
