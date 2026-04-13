@@ -100,7 +100,8 @@ function Navbar({ onSignOut }) {
   }
 
   return (
-    <nav className="  bg-gray-200 dark:bg-gray-900
+    <nav className=" sticky top-0 z-50
+                      bg-gray-200 dark:bg-gray-900
                       text-orange-700 dark:text-white 
                       shadow-md px-6 py-4 flex justify-between items-center
                       border-b border-gray-400 dar:border-gray-400">
