@@ -16,6 +16,9 @@ function Dashboard() {
                                             state: 'State'
   })
 
+  // handle the flashing default data
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     const getUserProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -41,11 +44,21 @@ function Dashboard() {
           state: data.location_state || 'State',
         })
       }
+
+      setLoading(false)
     }
 
     getUserProfile()
   }, [])
 
+// so the "Guest" and default values don't flash before the actual user data loads
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+    </div>
+  )
+}
 
 return (
   <div className="min-h-screen flex flex-col items-center justify-center 
