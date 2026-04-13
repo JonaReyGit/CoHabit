@@ -107,7 +107,7 @@ function Navbar({ onSignOut }) {
                       border-b border-gray-400 dar:border-gray-400">
       <h1
         className="text-xl font-bold cursor-pointer inline-flex items-center gap-2"
-        onClick={() => navigate('/dashboard')}
+        onClick={() => navigate('/homepage')}
       >
         <img 
           src={LOGO}
