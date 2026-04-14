@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
@@ -17,34 +17,7 @@ import {
 } from '@/components/ui/calendar'
 import Footer from "@/components/shared/Footer"
 
-function AccountSettings() {
-  const [form_prof, setFormProf] = useState({
-                                    email: "",
-                                    full_name: "", 
-                                    avatar_url: "", 
-                                    bio: "", 
-                                    date_of_birth: "", 
-                                    gender: "", 
-                                    phone: "", 
-                                    location_city: "", 
-                                    location_state: ""})
-
-  const [form_preferences, setFormPreferences] = useState({
-                                                  budget_min: null, 
-                                                  budget_max: null, 
-                                                  preferred_location: null, 
-                                                  move_in_date: null, 
-                                                  cleanliness: null, 
-                                                  noise_level: null, 
-                                                  sleep_schedule: null,
-                                                  guests_frequency: null,
-                                                  smoking: null,
-                                                  pets: null,
-                                                  property_type: null,
-                                                  deal_breakers: null,
-    })
-
-  const US_STATES = [
+ const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
   "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
   "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
@@ -56,145 +29,22 @@ function AccountSettings() {
   "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
   "West Virginia", "Wisconsin", "Wyoming"
 ];
-  
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(null);
-  const [newPassword, setNewPassword] = useState("");
 
-  useEffect(() => {
-    async function fetchProfile() {
-      const {data: { user } } = await supabase.auth.getUser(); 
+const EditableField = forwardRef(function EditableField({ label, value, onConfirm, placeholder, renderDisplay, inputType = "text", options = [] }, ref) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [temp, setTemp] = useState(value);
 
-      const { data, error } = await supabase 
-      .from("profiles")
-      .select("email, full_name, avatar_url, bio, date_of_birth, gender, phone, location_city, location_state")
-      .eq("id", user.id)
-      .single();
+    useImperativeHandle(ref, () => ({
+      startEditing: ()=> {
+        console.log("start editing called")
+        setIsEditing(true)}
+    }));
 
-      if (data) {
-        setFormProf({
-                  email: data.email || null,
-                  full_name: data.full_name || null, 
-                  avatar_url: data.avatar_url || null, 
-                  bio: data.bio || null, 
-                  date_of_birth: data.date_of_birth || null, 
-                  gender: data.gender || null, 
-                  phone: data.phone || null, 
-                  location_city: data.location_city || null, 
-                  location_state: data.location_state || null,
-        });
-      }
-      setLoading(false)
-    }
-    fetchProfile();
-
-    async function fetchPreferences() {
-      const {data: { user } } = await supabase.auth.getUser(); 
-
-      const { data, error } = await supabase 
-      .from("preferences")
-      .select("budget_min, budget_max, preferred_location, move_in_date, cleanliness, noise_level, sleep_schedule, guests_frequency, smoking, pets, deal_breakers, property_type")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-      if (data) {
-        setFormPreferences({
-                  budget_min: data.budget_min || null, 
-                  budget_max: data.budget_max || null, 
-                  preferred_location: data.preferred_location || null, 
-                  move_in_date: data.move_in_date || null, 
-                  cleanliness: data.cleanliness || null, 
-                  noise_level: data.noise_level || null, 
-                  sleep_schedule: data.sleep_schedule || null,
-                  guests_frequency: data.guests_frequency || null,
-                  smoking: data.smoking || null,
-                  pets: data.pets || null,
-                  property_type: data.property_type || null,
-                  deal_breakers: data.deal_breakers || null,
-        });
-      }
-      setLoading(false)
-    }
-    fetchPreferences();
-
-  }, []);
-
-
-  async function saveProfile() {
-    setError(null)
-    setLoading(true)
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // update values
-    const { error } = await supabase
-    .from('profiles')
-    .update({
-        email: form_prof.email,
-        full_name: form_prof.full_name,
-        bio: form_prof.bio,
-        gender: form_prof.gender,
-        phone: form_prof.phone,
-        location_city: form_prof.location_city,
-        location_state: form_prof.location_state,
-        date_of_birth: form_prof.date_of_birth
-    })
-    .eq('id', user.id)
-
-    if (error) {
-      console.error("Supabase error:", error.message);
-      setLoading(false)
-      return
-    }
-
-    setLoading(false)
-  }
-
-  async function savePreferences() {
-    setError(null)
-    setLoading(true)
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // update values
-    const { error } = await supabase
-    .from('preferences')
-    .update({
-        budget_min: form_preferences.budget_min, 
-        budget_max: form_preferences.budget_max, 
-        preferred_location: form_preferences.preferred_location, 
-        move_in_date: form_preferences.move_in_date, 
-        cleanliness: form_preferences.cleanliness, 
-        noise_level: form_preferences.noise_level, 
-        sleep_schedule: form_preferences.sleep_schedule,
-        guests_frequency: form_preferences.guests_frequency,
-        smoking: form_preferences.smoking,
-        pets: form_preferences.pets,
-        property_type: form_preferences.property_type,
-        deal_breakers: typeof form_preferences.deal_breakers === "string"
-                                                                ? form_preferences.deal_breakers.split(",").map(s => s.trim()).filter(Boolean)
-                                                                : form_preferences.deal_breakers ?? null,
-    })
-    .eq('user_id', user.id)
-
-    if (error) {
-      console.error("Supabase error:", error.message);
-      setLoading(false)
-      return
-    }
-
-    setLoading(false)
-  }
-
-  function EditableField({ label, value, onConfirm, placeholder, renderDisplay, inputType = "text", options = [] }) {
     useEffect(() => {
       if (!isEditing) {
         setTemp(value);
       }
     }, [value]);
-
-    const [isEditing, setIsEditing] = useState(false);
-    const [temp, setTemp] = useState(value);
 
     const handleConfirm = () => {
       console.log("Confirming temp value:", temp);
@@ -322,8 +172,165 @@ function AccountSettings() {
       )}
     </>
   );
-}
+});
 
+
+function AccountSettings() {
+  const [form_prof, setFormProf] = useState({
+                                    email: "",
+                                    full_name: "", 
+                                    avatar_url: "", 
+                                    bio: "", 
+                                    date_of_birth: "", 
+                                    gender: "", 
+                                    phone: "", 
+                                    location_city: "", 
+                                    location_state: ""})
+
+  const [form_preferences, setFormPreferences] = useState({
+                                                  budget_min: null, 
+                                                  budget_max: null, 
+                                                  preferred_location: null, 
+                                                  move_in_date: null, 
+                                                  cleanliness: null, 
+                                                  noise_level: null, 
+                                                  sleep_schedule: null,
+                                                  guests_frequency: null,
+                                                  smoking: null,
+                                                  pets: null,
+                                                  property_type: null,
+                                                  deal_breakers: null,
+    })
+  
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(null);
+  const [newPassword, setNewPassword] = useState("");
+  const confirmPasswordRef = useRef(null);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      const {data: { user } } = await supabase.auth.getUser(); 
+
+      const { data, error } = await supabase 
+      .from("profiles")
+      .select("email, full_name, avatar_url, bio, date_of_birth, gender, phone, location_city, location_state")
+      .eq("id", user.id)
+      .single();
+
+      if (data) {
+        setFormProf({
+                  email: data.email || null,
+                  full_name: data.full_name || null, 
+                  avatar_url: data.avatar_url || null, 
+                  bio: data.bio || null, 
+                  date_of_birth: data.date_of_birth || null, 
+                  gender: data.gender || null, 
+                  phone: data.phone || null, 
+                  location_city: data.location_city || null, 
+                  location_state: data.location_state || null,
+        });
+      }
+      setLoading(false)
+    }
+    fetchProfile();
+
+    async function fetchPreferences() {
+      const {data: { user } } = await supabase.auth.getUser(); 
+
+      const { data, error } = await supabase 
+      .from("preferences")
+      .select("budget_min, budget_max, preferred_location, move_in_date, cleanliness, noise_level, sleep_schedule, guests_frequency, smoking, pets, deal_breakers, property_type")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+      if (data) {
+        setFormPreferences({
+                  budget_min: data.budget_min || null, 
+                  budget_max: data.budget_max || null, 
+                  preferred_location: data.preferred_location || null, 
+                  move_in_date: data.move_in_date || null, 
+                  cleanliness: data.cleanliness || null, 
+                  noise_level: data.noise_level || null, 
+                  sleep_schedule: data.sleep_schedule || null,
+                  guests_frequency: data.guests_frequency || null,
+                  smoking: data.smoking || null,
+                  pets: data.pets || null,
+                  property_type: data.property_type || null,
+                  deal_breakers: data.deal_breakers || null,
+        });
+      }
+      setLoading(false)
+    }
+    fetchPreferences();
+
+  }, []);
+
+
+  async function saveProfile() {
+    setError(null)
+    setLoading(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // update values
+    const { error } = await supabase
+    .from('profiles')
+    .update({
+        email: form_prof.email,
+        full_name: form_prof.full_name,
+        bio: form_prof.bio,
+        gender: form_prof.gender,
+        phone: form_prof.phone,
+        location_city: form_prof.location_city,
+        location_state: form_prof.location_state,
+        date_of_birth: form_prof.date_of_birth
+    })
+    .eq('id', user.id)
+
+    if (error) {
+      console.error("Supabase error:", error.message);
+      setLoading(false)
+      return
+    }
+
+    setLoading(false)
+  }
+
+  async function savePreferences() {
+    setError(null)
+    setLoading(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // update values
+    const { error } = await supabase
+    .from('preferences')
+    .update({
+        budget_min: form_preferences.budget_min, 
+        budget_max: form_preferences.budget_max, 
+        preferred_location: form_preferences.preferred_location, 
+        move_in_date: form_preferences.move_in_date, 
+        cleanliness: form_preferences.cleanliness, 
+        noise_level: form_preferences.noise_level, 
+        sleep_schedule: form_preferences.sleep_schedule,
+        guests_frequency: form_preferences.guests_frequency,
+        smoking: form_preferences.smoking,
+        pets: form_preferences.pets,
+        property_type: form_preferences.property_type,
+        deal_breakers: typeof form_preferences.deal_breakers === "string"
+                                                                ? form_preferences.deal_breakers.split(",").map(s => s.trim()).filter(Boolean)
+                                                                : form_preferences.deal_breakers ?? null,
+    })
+    .eq('user_id', user.id)
+
+    if (error) {
+      console.error("Supabase error:", error.message);
+      setLoading(false)
+      return
+    }
+
+    setLoading(false)
+  }
 
 
   return (
@@ -613,10 +620,15 @@ function AccountSettings() {
                       inputType="password"
                       value=""
                       placeholder="Enter new password"
-                      onConfirm={(val) => setNewPassword(val)}
+                      onConfirm={(val) => {
+                        setNewPassword(val);
+                        console.log("ref: ", confirmPasswordRef.current)
+                        confirmPasswordRef.current?.startEditing();
+                    }}
                     />
 
                     <EditableField
+                      ref={confirmPasswordRef}
                       label="Confirm Password"
                       inputType='password'
                       value=""
