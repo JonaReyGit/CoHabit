@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
@@ -26,7 +26,7 @@ function ProfileSetup() {
   const [error, setError] = useState(null)
 
   // profile stuff
-  const [fullName, setFullName] = useState('')
+  const [full_name, setFullName] = useState('')
   const [bio, setBio] = useState('')
   const [gender, setGender] = useState('')
   const [phone, setPhone] = useState('')
@@ -43,8 +43,24 @@ function ProfileSetup() {
   const [noiseLevel, setNoiseLevel] = useState(3)
   const [sleep_schedule, setSleepSchedule] = useState('')
   const [guests_frequency, setGuestFrequency] = useState('')
+  const [property_type, setPropertyType] = useState('')
   const [smoking, setSmoking] = useState(false)
   const [pets, setPets] = useState(false)
+  const [deal_breakers, setDealBreakers] = useState(false)
+
+
+  const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+  "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+  "New Hampshire", "New Jersey", "New Mexico", "New York",
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+  "West Virginia", "Wisconsin", "Wyoming"
+];
 
   //dropdown logic for gender
   const [genderOpen, setGenderOpen] = useState(false)
@@ -70,13 +86,13 @@ function ProfileSetup() {
     const { error: err } = await supabase
       .from('profiles')
       .update({
-        full_name: fullName,
+        full_name: full_name,
         bio: bio,
         gender: gender,
         phone: phone,
         location_city: location_city,
         location_state: location_state,
-        date_of_birth: date_of_birth
+        date_of_birth: date_of_birth,
       })
       .eq('id', user.id)
 
@@ -110,6 +126,9 @@ function ProfileSetup() {
         guests_frequency: guests_frequency || null,
         smoking: smoking || null,
         pets: pets || null,
+        deal_breakers: deal_breakers
+        ? deal_breakers.split(",").map(s => s.trim()).filter(Boolean)
+        : null
         
       })
 
@@ -142,15 +161,12 @@ function ProfileSetup() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
               <input
                 type="text"
-                value={fullName}
+                value={full_name}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="John Doe"
               />
             </div>
-
-            {/* TODO: add inputs for bio, gender, phone, city, state, dob */}
-            {/* just copy the same pattern as the full name input above */}
             
           <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Biography</label>
@@ -209,18 +225,32 @@ function ProfileSetup() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-              <input
-                type="text"
-                value={location_state}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Your State"
-              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {location_state || 'Select state'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {US_STATES.map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setState(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
               <input
-                type="text"
+                type="date"
                 value={date_of_birth}
                 onChange={(e) => setDob(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -262,13 +292,6 @@ function ProfileSetup() {
               </div>
             </div>
 
-            {/* TODO: add the rest of the preference inputs */}
-            {/* sleep_schedule - could be a dropdown (early bird, night owl, flexible) */}
-            {/* guests_frequency - dropdown (never, sometimes, often) */}
-            {/* cleanliness and noise_level - maybe a 1-5 slider or just number input */}
-            {/* smoking and pets - checkboxes */}
-            {/* move_in_date - date picker */}
-            {/* preferred_location - text input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sleep Schedule</label>
               <DropdownMenu>
@@ -387,6 +410,42 @@ function ProfileSetup() {
               onChange={(e) => setPreferredLocation(e.target.value)}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder='Set your preferred location'
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {property_type || 'Select preferred property type'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Condo', 'Apartment', 'House'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setPropertyType(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Deal-Brakers</label>
+              <input
+                type="text"
+
+                onChange={(e) => setDealBreakers(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter comma-separated list of deal-breakers"
               />
             </div>
 
