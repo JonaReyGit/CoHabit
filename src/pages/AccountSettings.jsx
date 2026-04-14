@@ -305,7 +305,7 @@ function AccountSettings() {
       ) : (
         <div className="flex flex-col items-start justify-between">
            {renderDisplay ? renderDisplay(value) : (
-            <span className="bg-gray-200 rounded-xl px-3 py-2">{value}</span>
+            <span className="bg-gray-100 rounded-xl px-3 py-2 w-64 min-h-[2.5rem] inline-block">{value}</span>
           )}
           <button type="button" 
           onClick={() => setIsEditing(true)}
@@ -322,8 +322,8 @@ function AccountSettings() {
   return (
     <>
     <div className="min-h-screen flex bg-gray-50">
-      <div className="w-full mx-5max-h-180 bg-white rounded-lg shadow-xl  p-12">
-        <div className='p-5 rounded-2xl bg-blue-600'>
+      <div className="w-full mx-5max-h-180 bg-[#b2dcf1b9] rounded-lg shadow-xl  p-12">
+        <div className='p-5 rounded-2xl bg-[#659af6]'>
         <h1 className="text-2xl text-white font-bold mb-2">Account Settings</h1>
         </div>
 
@@ -363,6 +363,12 @@ function AccountSettings() {
                       value={form_prof.bio}
                       placeholder="Enter your bio"
                       onConfirm={(val) => setFormProf({ ...form_prof, bio: val })}
+                      renderDisplay={(val) => (
+                        <textarea
+                        value={val}
+                        readOnly
+                        className=" bg-gray-100 w-full border rounded-lg px-3 py-2"/>
+                      )}
                     />
                 </div>
 
@@ -416,9 +422,13 @@ function AccountSettings() {
                   </div>
                 </div>
               
-                <button
-                type="submit"
-                className="border-black py-3 px-5 text-white bg-blue-500 rounded-2xl hover:bg-blue-600">Submit</button>
+                  <div>
+                    <button
+                    type="submit"
+                    className="py-3 px-5 text-white bg-blue-500 rounded-2xl hover:bg-blue-600">
+                    Submit
+                    </button>
+                  </div>
               </form>}
             </TabsContent>
 
@@ -558,10 +568,14 @@ function AccountSettings() {
                       onConfirm={(val) => setFormPreferences({ ...form_preferences, deal_breakers: val })}
                     />
                   </div>
-
-                  <button
-                type="submit"
-                className="border-black py-3 px-5 text-white bg-blue-500 rounded-2xl hover:bg-blue-600">Submit</button>
+                  
+                  <div>
+                    <button
+                    type="submit"
+                    className="py-3 px-5 text-white bg-blue-500 rounded-2xl hover:bg-blue-600">
+                      Submit
+                      </button>
+                  </div>
                 </div>
               </form>
               }
