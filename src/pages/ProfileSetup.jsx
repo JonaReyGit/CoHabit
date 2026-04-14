@@ -46,10 +46,8 @@ function ProfileSetup() {
   const [property_type, setPropertyType] = useState('')
   const [smoking, setSmoking] = useState(false)
   const [pets, setPets] = useState(false)
+  const [deal_breakers, setDealBreakers] = useState(false)
 
-  //dropdown logic for gender
-  const [genderOpen, setGenderOpen] = useState(false)
-  const dropdownRef = useRef(null)
 
   const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
@@ -63,6 +61,10 @@ function ProfileSetup() {
   "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
   "West Virginia", "Wisconsin", "Wyoming"
 ];
+
+  //dropdown logic for gender
+  const [genderOpen, setGenderOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
   useEffect(() => {
     const handler = (e) => {
@@ -90,7 +92,7 @@ function ProfileSetup() {
         phone: phone,
         location_city: location_city,
         location_state: location_state,
-        date_of_birth: date_of_birth
+        date_of_birth: date_of_birth,
       })
       .eq('id', user.id)
 
@@ -124,6 +126,9 @@ function ProfileSetup() {
         guests_frequency: guests_frequency || null,
         smoking: smoking || null,
         pets: pets || null,
+        deal_breakers: deal_breakers
+        ? deal_breakers.split(",").map(s => s.trim()).filter(Boolean)
+        : null
         
       })
 
@@ -431,6 +436,17 @@ function ProfileSetup() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Deal Brakers</label>
+              <input
+                type="text"
+                value={deal_breakers}
+                onChange={(e) => setDealBreakers(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="John Doe"
+              />
             </div>
 
             <div className="flex gap-4">
