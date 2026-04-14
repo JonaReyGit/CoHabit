@@ -656,7 +656,8 @@ function AccountSettings() {
                       Reset Password via Email
                     </button>
                   </div>
-                </div>}
+                </div>
+                }
             </TabsContent>
           </Tabs>
         </div>  
