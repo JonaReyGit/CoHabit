@@ -2,8 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
-const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/6/67/User_Avatar.png"
-const LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Noun_Project_house_icon_475319_cc_%28Wikiarabia_2022%29.svg/640px-Noun_Project_house_icon_475319_cc_%28Wikiarabia_2022%29.svg.png"
+import d_a_img from "@/assets/images/default-avatar.png";
+import logo_img from "@/assets/images/Logo.svg";
+
+// const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/6/67/User_Avatar.png"
+const DEFAULT_AVATAR = d_a_img
+const LOGO = logo_img
 
 function Navbar({ onSignOut }) {
   const navigate = useNavigate()
@@ -27,10 +31,7 @@ function Navbar({ onSignOut }) {
 
 
   // get user profile from Supabase
-  const [profile, setProfile] = useState({  name: 'Guest',
-                                            email: 'placeholder@gmail.com',
-                                            picture: DEFAULT_AVATAR,
-  })
+  const [profile, setProfile] = useState(null)
 
   const getUserProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -50,14 +51,6 @@ function Navbar({ onSignOut }) {
         })
       }
     } 
-    
-    // when signed out
-    if (!user) {
-      setProfile({  name: 'Guest', 
-                    email: 'placeholder@gmail.com', 
-                    picture: DEFAULT_AVATAR })
-      return
-    }
   }
 
   useEffect(() => {
@@ -99,26 +92,28 @@ function Navbar({ onSignOut }) {
   }
 
   return (
-    <nav className="  bg-gray-200 dark:bg-gray-900
-                      text-black dark:text-white 
-                      shadow-md px-6 py-4 flex justify-between items-center">
+    <nav className=" sticky top-0 z-50
+                      bg-gray-200 dark:bg-gray-900
+                      text-orange-700 dark:text-white 
+                      shadow-md px-6 py-4 flex justify-between items-center
+                      border-b border-gray-400 dark:border-gray-400">
       <h1
         className="text-xl font-bold cursor-pointer inline-flex items-center gap-2"
-        onClick={() => navigate('/dashboard')}
+        onClick={() => navigate('/')}
       >
         <img 
           src={LOGO}
           alt="CoHabit Logo"
           className="w-8 h-8 object-contain"
         />
-        CoHabit
+        <span className="hover:text-blue-900 dark:hover:text-blue-500 ">CoHabit</span>
       </h1>
 
       {/* Template for regular buttons to be clicked */}
       <div className="flex gap-4 items-center relative">
         <button
           onClick={() => navigate('/dashboard')}
-          className="hover:text-blue-600"
+          className="hover:text-blue-900 dark:hover:text-blue-500"
         >
           Dashboard
         </button>
@@ -128,7 +123,7 @@ function Navbar({ onSignOut }) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="hover:text-blue-600 flex items-center gap-1"
+            className="hover:text-blue-900 dark:hover:text-blue-500 flex items-center gap-1"
             aria-expanded={dropdownOpen}
             aria-haspopup="true"
           >
@@ -159,7 +154,7 @@ function Navbar({ onSignOut }) {
                 <img
                   src={profile.picture}
                   alt="Profile avatar"
-                  className="w-12 h-12 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover"
                   onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR }}
                 />
                 <div className="flex flex-col overflow-hidden">
@@ -174,7 +169,7 @@ function Navbar({ onSignOut }) {
                   <button
                     onClick={() => navTo('/dashboard')}
                     className=" w-full text-left px-4 py-2 
-                              hover:bg-gray-100 dark:hover:bg-gray-700"
+                              hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Dashboard
                   </button>
@@ -184,7 +179,7 @@ function Navbar({ onSignOut }) {
                   <button
                     onClick={() => navTo('/matching')}
                     className=" w-full text-left px-4 py-2 
-                              hover:bg-gray-100 dark:hover:bg-gray-700"
+                              hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Matching
                   </button>
@@ -192,11 +187,11 @@ function Navbar({ onSignOut }) {
 
                 <li>
                   <button
-                    onClick={() => navTo('/messaging')}
+                    onClick={() => navTo('/messages')}
                     className=" w-full text-left px-4 py-2 
-                              hover:bg-gray-100 dark:hover:bg-gray-700"
+                              hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
-                    Messaging
+                    Messages
                   </button>
                 </li>
 
@@ -204,7 +199,7 @@ function Navbar({ onSignOut }) {
                   <button
                     onClick={() => navTo('/profile')}
                     className=" w-full text-left px-4 py-2 
-                              hover:bg-gray-100 dark:hover:bg-gray-700"
+                              hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Profile
                   </button>
@@ -215,8 +210,8 @@ function Navbar({ onSignOut }) {
                   <button
                     onClick={handleSignOut}
                     className=" w-full py-2 
-                              hover:bg-red-100 dark:hover:bg-red-200
-                              text-red-600 font-medium"
+                              hover:bg-red-200 dark:hover:bg-slate-500
+                              text-red-600 dark:text-white font-medium"
                   >
                     Sign Out
                   </button>
@@ -230,7 +225,7 @@ function Navbar({ onSignOut }) {
         <button
           onClick={toggleDarkMode}
           className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300
-            ${darkMode ? 'bg-blue-900' : 'bg-amber-100'}`}
+            ${darkMode ? 'bg-blue-900' : 'bg-orange-200'}`}
         >
           <div
             className={`w-6 h-6 rounded-full shadow-md transform transition duration-300 flex items-center justify-center
