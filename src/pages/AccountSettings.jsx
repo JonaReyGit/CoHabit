@@ -209,7 +209,7 @@ function AccountSettings() {
             value={temp}
             onChange={e => setTemp(e.target.value)}
             placeholder={placeholder}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full border bg-white dark:bg-gray-800 rounded-lg px-3 py-2"
           />
         );
       }
@@ -219,7 +219,7 @@ function AccountSettings() {
           <select
             value={temp}
             onChange={e => setTemp(e.target.value)}
-            className="mt-2 w-full border rounded-lg px-3 py-2"
+            className="mt-2 w-full bg-white dark:bg-gray-800 border rounded-lg px-3 py-2"
           >
           <option value="" disabled>Select an option</option>
             {options.map(opt => {
@@ -236,7 +236,7 @@ function AccountSettings() {
             <div>
               <span className='text-md my-6'>{temp}/5</span>
               <Slider
-                className={"bg-gray-200 hover:cursor-grabbing my-2 hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
+                className={"bg-white hover:cursor-grabbing my-2 hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
                 min={1}
                 max={5}
                 step={1}
@@ -251,7 +251,7 @@ function AccountSettings() {
           return (
             <div>
               <Checkbox
-                className="hover:cursor-pointer"
+                className="bg-white dark:bg-gray-800 hover:cursor-pointer dark:data-[state=checked]:bg-gray-800"
                 id={label}
                 checked={temp}
                 onCheckedChange={(val) => setTemp(val)}
@@ -264,7 +264,7 @@ function AccountSettings() {
           return (
             <div>
               <Calendar
-              className="rounded-md border"
+              className="bg-white dark:bg-gray-800 rounded-md border"
               mode="single"
               selected={temp}
               onSelect={(val) => setTemp(val)}
@@ -282,34 +282,36 @@ function AccountSettings() {
           onKeyDown={e => { if (e.key === 'Enter') handleConfirm(); }}
           onChange={e => setTemp(e.target.value)}
           placeholder={placeholder}
-          className="mt-2 w-full border rounded-lg px-3 py-2"
+          className="bg-white dark:bg-gray-800 mt-2 w-full border rounded-lg px-3 py-2"
         />
       );
     };
 
   return (
     <>
-      <label className="block text-lg font-medium text-gray-700 mb-1 whitespace-nowrap">{label}</label>
+      <label className="block text-lg font-medium dark:text-white text-gray-700 mb-1 whitespace-nowrap">{label}</label>
       {isEditing ? (
         <>
           {renderInput()}
+          <div className="flex">
           <button type="button" onClick={handleCancel}
-            className="flex-1 mx-2 my-2 px-2 bg-red-400 text-white rounded-md hover:bg-red-700 cursor-pointer disabled:opacity-50">
+            className="mx-2 my-2 px-2 dark:bg-red-600 bg-red-400 text-white rounded-md hover:bg-red-700 cursor-pointer disabled:opacity-50">
             Cancel
           </button>
           <button type="button" onClick={handleConfirm}
-            className="flex-1 my-2 px-2 bg-blue-400 text-white rounded-md hover:bg-blue-700 cursor-pointer disabled:opacity-50">
+            className="my-2 px-2 dark:bg-blue-600 bg-blue-400 text-white rounded-md hover:bg-blue-700 cursor-pointer disabled:opacity-50">
             Confirm
           </button>
+          </div>
         </>
       ) : (
         <div className="flex flex-col items-start justify-between">
            {renderDisplay ? renderDisplay(value) : (
-            <span className="bg-gray-100 rounded-xl px-3 py-2 w-64 min-h-[2.5rem] inline-block">{value}</span>
+            <span className="bg-gray-100 dark:bg-gray-800 rounded-xl px-3 py-2 w-64 min-h-[2.5rem] inline-block">{value}</span>
           )}
           <button type="button" 
           onClick={() => setIsEditing(true)}
-          className="w-fit my-2 px-2 bg-gray-400 text-white rounded-md hover:bg-gray-700 hover: cursor-pointer disabled:opacity-50"
+          className="w-fit my-2 px-2 bg-gray-400  text-white rounded-md hover:bg-gray-700 hover:cursor-pointer hover:dark:bg-gray-800 disabled:opacity-50"
           >Edit</button>
         </div>
       )}
@@ -322,17 +324,17 @@ function AccountSettings() {
   return (
     <>
     <div className="min-h-screen flex bg-gray-50">
-      <div className="w-full mx-5max-h-180 bg-[#b2dcf1b9] rounded-lg shadow-xl  p-12">
-        <div className='p-5 rounded-2xl bg-[#659af6]'>
+      <div className="w-full mx-5max-h-180 bg-[#b2dcf1b9] dark:bg-gray-700 rounded-lg shadow-xl  p-12">
+        <div className='p-5 rounded-2xl bg-[#659af6] dark:bg-gray-900'>
         <h1 className="text-2xl text-white font-bold mb-2">Account Settings</h1>
         </div>
 
         <div className="flex">
           <Tabs defaultValue="profile">
             <TabsList>
-              <TabsTrigger className="data-[state=active]:bg-blue-500 data-[state=active]:text-white mx-2 bg-blue-100 hover:bg-blue-200" value="profile">Profile</TabsTrigger>
-              <TabsTrigger className="data-[state=active]:bg-blue-500 data-[state=active]:text-white mx-2 bg-blue-100 hover:bg-blue-200" value="preferences">Preferences</TabsTrigger>
-              <TabsTrigger className="data-[state=active]:bg-blue-500 data-[state=active]:text-white bg-blue-100 hover:bg-blue-200" value="account">Account</TabsTrigger>
+              <TabsTrigger className="data-[state=active]:bg-blue-500 dark:border-blue-900 dark:hover:bg-blue-900 dark:data-[state=active]:bg-black dark:bg-gray-800 data-[state=active]:text-white mx-2 bg-blue-100 hover:bg-blue-200" value="profile">Profile</TabsTrigger>
+              <TabsTrigger className="data-[state=active]:bg-blue-500 dark:border-blue-900 dark:hover:bg-blue-900 dark:data-[state=active]:bg-black dark:bg-gray-800 data-[state=active]:text-white mx-2 bg-blue-100 hover:bg-blue-200" value="preferences">Preferences</TabsTrigger>
+              <TabsTrigger className="data-[state=active]:bg-blue-500 dark:border-blue-900 dark:hover:bg-blue-900 dark:data-[state=active]:bg-black dark:bg-gray-800 data-[state=active]:text-white mx-2 bg-blue-100 hover:bg-blue-200" value="account">Account</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile">
@@ -367,7 +369,7 @@ function AccountSettings() {
                         <textarea
                         value={val}
                         readOnly
-                        className=" bg-gray-100 w-full border rounded-lg px-3 py-2"/>
+                        className=" bg-gray-100 dark:bg-gray-800 w-full border rounded-lg px-3 py-2"/>
                       )}
                     />
                 </div>
@@ -425,7 +427,7 @@ function AccountSettings() {
                   <div>
                     <button
                     type="submit"
-                    className="py-3 px-5 text-white bg-blue-500 rounded-2xl hover:bg-blue-600">
+                    className="py-3 px-5 text-white bg-blue-500 dark:bg-gray-800 dark:hover:bg-gray-900 rounded-2xl hover:bg-blue-600 hover:cursor-pointer">
                     Submit
                     </button>
                   </div>
@@ -507,7 +509,7 @@ function AccountSettings() {
                       value={form_preferences.pets}
                       onConfirm={(val) => setFormPreferences({ ...form_preferences, pets: val })}
                       renderDisplay={(val) => (
-                      <input type="checkbox" checked={!!val} readOnly className="hover:cursor-pointer" />
+                      <input type="checkbox" checked={!!val} readOnly className="dark:dark:accent-gray-800" />
                     )}
                     />
                   </div>
@@ -519,7 +521,7 @@ function AccountSettings() {
                       value={form_preferences.smoking}
                       onConfirm={(val) => setFormPreferences({ ...form_preferences, smoking: val })}
                       renderDisplay={(val) => (
-                      <input type="checkbox" checked={!!val} readOnly className="hover:cursor-pointer" />
+                      <input type="checkbox" checked={!!val} readOnly className="dark:accent-gray-800" />
                     )}
                     />
                   </div>
@@ -540,7 +542,7 @@ function AccountSettings() {
                       value={form_preferences.move_in_date}
                       onConfirm={(val) => setFormPreferences({ ...form_preferences, move_in_date: val })}
                       renderDisplay={(val) => (
-                      <span className="bg-gray-200 rounded-xl px-3 py-2">
+                      <span className="bg-gray-200 dark:bg-gray-800 rounded-xl px-3 py-2">
                         {val ? new Date(val).toLocaleDateString() : "Not set"}
                       </span>
                       )}
@@ -572,7 +574,7 @@ function AccountSettings() {
                   <div>
                     <button
                     type="submit"
-                    className="py-3 px-5 text-white bg-blue-500 rounded-2xl hover:bg-blue-600">
+                    className="py-3 px-5 text-white bg-blue-500 dark:bg-gray-800 dark:hover:bg-gray-900 rounded-2xl hover:bg-blue-600 hover:cursor-pointer">
                       Submit
                       </button>
                   </div>
