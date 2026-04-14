@@ -43,6 +43,7 @@ function ProfileSetup() {
   const [noiseLevel, setNoiseLevel] = useState(3)
   const [sleep_schedule, setSleepSchedule] = useState('')
   const [guests_frequency, setGuestFrequency] = useState('')
+  const [property_type, setPropertyType] = useState('')
   const [smoking, setSmoking] = useState(false)
   const [pets, setPets] = useState(false)
 
@@ -225,7 +226,7 @@ function ProfileSetup() {
                     type="button"
                     className="w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
                   >
-                    {gender || 'Select state'}
+                    {location_state || 'Select state'}
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-full bg-white">
@@ -233,7 +234,7 @@ function ProfileSetup() {
                     <DropdownMenuItem
                       key={option}
                       className="hover:bg-gray-200" 
-                      onClick={() => setGender(option)}
+                      onClick={() => setState(option)}
                     >
                       {option}
                     </DropdownMenuItem>
@@ -405,6 +406,31 @@ function ProfileSetup() {
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder='Set your preferred location'
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 border rounded-md text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                  >
+                    {property_type || 'Select preferred property type'}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full bg-white">
+                  {['Condo', 'Apartment', 'House'].map((option) => (
+                    <DropdownMenuItem
+                      key={option}
+                      className="hover:bg-gray-200" 
+                      onClick={() => setPropertyType(option)}
+                    >
+                      {option}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="flex gap-4">
