@@ -59,6 +59,7 @@ function AccountSettings() {
   
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(null);
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     async function fetchProfile() {
@@ -597,26 +598,38 @@ function AccountSettings() {
                       placeholder="Enter your new email"
                       onConfirm={async (val) => {
                         const { error } = await supabase.auth.updateUser({ email: val });
-                        if (error) console.error(error);
-                        else alert("Check your new email for a confirmation link!");
+                        if (!error) {
+                        await supabase
+                      .from('profiles')
+                      .update({ email: val })
+                      .eq('id', user.id);
+                    }
                       }}
                     />
                   </div>
                   <div>
                     <EditableField
-                    label="Password"
-                    inputType="password"
-                    value=""
-                    placeholder="Enter new password"
-                    onConfirm={async (val) => {
-                      const { error } = await supabase.auth.updateUser({ password: val });
-                      if (!error) {
-                      await supabase
-                      .from('users') // your table name
-                      .update({ email: val })
-                      .eq('id', user.id);
-                     }
-                    }}
+                      label="New Password"
+                      inputType="password"
+                      value=""
+                      placeholder="Enter new password"
+                      onConfirm={(val) => setNewPassword(val)}
+                    />
+
+                    <EditableField
+                      label="Confirm Password"
+                      inputType='password'
+                      value=""
+                      placeholder="Confirm new password"
+                      onConfirm={async (val) => {
+                        if (val !== newPassword) {
+                          alert("Passwords do not match!");
+                          return;
+                        }
+                        const { error } = await supabase.auth.updateUser({password: newPassword});
+                        if (error) console.error(error);
+                        else alert("Password updated!!")
+                      }}
                     />
                   </div>
                 </div>}
