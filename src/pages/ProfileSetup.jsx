@@ -439,13 +439,13 @@ function ProfileSetup() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Deal Brakers</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Deal-Brakers</label>
               <input
                 type="text"
-                value={deal_breakers}
+
                 onChange={(e) => setDealBreakers(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="John Doe"
+                placeholder="Enter comma-separated list of deal-breakers"
               />
             </div>
 
