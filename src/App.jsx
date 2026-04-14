@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import HomePage from './pages/Homepage'
 import Dashboard from './pages/Dashboard'
 import ProfileSetup from './pages/ProfileSetup'
+import AccountSettings from './pages/AccountSettings'
 import Messages from './pages/Messages'
 import Matching from './pages/Matching'
 import Navbar from './components/shared/Navbar'
@@ -37,14 +38,21 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/setup" element={<ProfileSetup />} />
-
-        <Route path="/dashboard" element={
+        <Route path="/setup" element={
+          <ProtectedRoute>
+            <ProfileSetup />
+          </ProtectedRoute>
+        } />
+        <Route path="/" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         } />
-
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <AccountSettings />
+          </ProtectedRoute>
+        } />
         <Route path="/messages" element={
           <ProtectedRoute>
             <Messages />
