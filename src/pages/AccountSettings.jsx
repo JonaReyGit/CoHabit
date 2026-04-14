@@ -604,6 +604,7 @@ function AccountSettings() {
                       value={form_prof.email}
                       placeholder="Enter your new email"
                       onConfirm={async (val) => {
+                        const { data: { user } } = await supabase.auth.getUser();
                         const { error } = await supabase.auth.updateUser({ email: val });
                         if (!error) {
                         await supabase
