@@ -644,6 +644,17 @@ function AccountSettings() {
                         else alert("Password updated!!")
                       }}
                     />
+                    <button onClick={async () => {
+                      const { data: { user } } = await supabase.auth.getUser();
+                      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+                        redirectTo: 'http://localhost:5173/reset-password',
+                      });
+                      if (error) console.error(error);
+                      else alert("Check your email for a password reset link!");
+                    }}
+                    className="px-4 py-2 dark:bg-gray-800 bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-gray-900 cursor-pointer">
+                      Reset Password via Email
+                    </button>
                   </div>
                 </div>}
             </TabsContent>
@@ -651,7 +662,7 @@ function AccountSettings() {
         </div>  
       </div>
     </div>
-    
+
     <div>
       <Footer />
     </div>
