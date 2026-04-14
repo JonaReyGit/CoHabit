@@ -8,6 +8,11 @@ import Florida from "@/assets/images/Florida.jpg"
 import NewYork from "@/assets/images/New-York.jpg"
 import Washington from "@/assets/images/Washington.jpg"
 import Wyoming from "@/assets/images/Wyoming.jpg"
+import Texas from "@/assets/images/Texas.jpg"
+import Nevada from "@/assets/images/Nevada.jpg"
+import NorthCarolina from "@/assets/images/North-Carolina.jpg"
+
+
 
 import matching_icon from "@/assets/images/smart-matching.svg"
 import messaging_icon from "@/assets/images/messaging.png"
@@ -20,6 +25,9 @@ const cities = [
   { name: "New York", img: NewYork },
   { name: "Washington", img: Washington },
   { name: "Wyoming", img: Wyoming },
+  { name: "Texas", img: Texas },
+  { name: "Nevada", img: Nevada },
+  { name: "North Carolina", img: NorthCarolina },
 ]
 
 const features = [
@@ -63,13 +71,13 @@ function HomePage() {
           <div className="w-full max-w-xl mt-4">
             <button
               onClick={() => navigate('/login')}
-              className="w-full bg-white dark:bg-gray-900 
+              className="w-full bg-white dark:bg-gray-500 
                         text-gray-900 dark:text-white text-center
                         rounded-xl p-6 border border-gray-200 dark:border-gray-700
                         hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700
                         transition-shadow"
             >
-              <p className="font-bold mb-3">
+              <p className="font-bold text-black mb-3">
                 Ready to find your roommate?
               </p>
 
@@ -123,7 +131,7 @@ function HomePage() {
       <section className="bg-[#b2dcf1b9] dark:bg-gray-700 
                              mx-auto px-6 py-16">
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">
-          Explore rooms in popular states
+          Let Your Location Drive Your Search
         </h2>
 
         <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-4 justify-items-center">
