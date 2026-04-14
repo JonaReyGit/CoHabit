@@ -62,7 +62,7 @@ function HomePage() {
           {/* call to action */}
           <div className="w-full max-w-xl mt-4">
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/matching')}
               className="w-full bg-white dark:bg-gray-900 
                         text-gray-900 dark:text-white text-center
                         rounded-xl p-6 border border-gray-200 dark:border-gray-700

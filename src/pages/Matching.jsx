@@ -1,34 +1,102 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 export default function Matching() {
     const [genderFilter, setGenderFilter] = useState('all')
     const [searchText, setSearchText] = useState('')
     const [typeFilter, setTypeFilter] = useState('all')
+    const [myPreferences, setMyPreferences] = useState(null)
+    const [users, setUsers] = useState([])
 
-    const users = [
-        { letter: 'A', name: 'Alex Johnson', location: 'Orlando, FL', gender: 'Male', budget: '$700–$900/mo', type: 'Apartment' },
-        { letter: 'M', name: 'Mary Smith', location: 'Tampa, FL', gender: 'Female', budget: '$600–$900/mo', type: 'Apartment' },
-        { letter: 'R', name: 'Robert Campos', location: 'Gainesville, FL', gender: 'Male', budget: '$900–$1,100/mo', type: 'House' },
-        { letter: 'J', name: 'Jessica Jones', location: 'Lakeland, FL', gender: 'Female', budget: '$600–$1,000/mo', type: 'Apartment' },
-        { letter: 'S', name: 'Stephanie Garcia', location: 'Orlando, FL', gender: 'Female', budget: '$700–$1,300/mo', type: 'Condo' },
-        { letter: 'T', name: 'Thomas Brown', location: 'Kissimmee, FL', gender: 'Male', budget: '$900–$1,250/mo', type: 'House' },
-        { letter: 'D', name: 'David Fuentes', location: 'Gainesville, FL', gender: 'Male', budget: '$600–$1,100/mo', type: 'Apartment' },
-        { letter: 'F', name: 'Francis Carter', location: 'Miami, FL', gender: 'Male', budget: '$900–$2,000/mo', type: 'Apartment' },
-        { letter: 'C', name: 'Cierra Truman', location: 'Jacksonville, FL', gender: 'Female', budget: '$800–$1,500/mo', type: 'House' },
-        { letter: 'B', name: "Brad O'Neil", location: 'Miami, FL', gender: 'Male', budget: '$1,000–$1,900/mo', type: 'Condo' },
-        { letter: 'E', name: 'Emily Martinez', location: 'Lakeland, FL', gender: 'Female', budget: '$700–$900/mo', type: 'House' },
-        { letter: 'G', name: 'George Larson', location: 'Tampa, FL', gender: 'Male', budget: '$800–$1,000/mo', type: 'Condo' },
-    ]
 
-    const filtered = users.filter(user => {
+    useEffect(() => {
+        const fetchData = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            // fetch my preferences
+            const { data: myPrefs } = await supabase
+                .from('preferences')
+                .select('*')
+                .eq('user_id', user.id)
+                .single()
+
+            if (myPrefs) setMyPreferences(myPrefs)
+
+            // fetch all other users profiles + their preferences
+            const { data: otherUsers } = await supabase
+                .from('profiles')
+                .select(`*, preferences(*)`)
+                .neq('id', user.id)
+
+            if (otherUsers) {
+                const formatted = otherUsers.map(u => ({
+                    id: u.id,
+                    name: u.full_name || u.email,
+                    letter: (u.full_name || u.email || '?')[0].toUpperCase(),
+                    location: u.preferences?.preferred_location || 'Unknown',
+                    gender: u.gender || 'Unknown',
+                    budget: `$${u.preferences?.budget_min || '?'}–$${u.preferences?.budget_max || '?'}/mo`,
+                    type: u.preferences?.property_type || 'Unknown',
+                    budget_min: u.preferences?.budget_min,
+                    budget_max: u.preferences?.budget_max,
+                    sleep_schedule: u.preferences?.sleep_schedule,
+                    cleanliness: u.preferences?.cleanliness,
+                    noise_level: u.preferences?.noise_level,
+                    smoking: u.preferences?.smoking,
+                    pets: u.preferences?.pets,
+                }))
+                setUsers(formatted)
+            }
+        }
+
+        fetchData()
+    }, [])
+
+    const calculateScore = (otherUser) => {
+        if (!myPreferences || !otherUser) return 0
+        let score = 0
+
+        // budget overlap
+        if (myPreferences.budget_min && otherUser.budget_min) {
+            const myMin = myPreferences.budget_min
+            const myMax = myPreferences.budget_max
+            const theirMin = otherUser.budget_min
+            const theirMax = otherUser.budget_max
+            if (myMin <= theirMax && theirMin <= myMax) score += 25
+        }
+
+        // sleep schedule match
+        if (myPreferences.sleep_schedule && otherUser.sleep_schedule) {
+            if (myPreferences.sleep_schedule === otherUser.sleep_schedule) score += 25
+        }
+
+        // cleanliness match (within 1 point)
+        if (myPreferences.cleanliness && otherUser.cleanliness) {
+            if (Math.abs(myPreferences.cleanliness - otherUser.cleanliness) <= 1) score += 20
+        }
+
+        // smoking match
+        if (myPreferences.smoking === otherUser.smoking) score += 15
+
+        // pets match
+        if (myPreferences.pets === otherUser.pets) score += 15
+
+        return score
+    }
+
+    const scored = users.map(user => ({
+        ...user,
+        score: calculateScore(user)
+    }))
+
+    const filtered = scored.filter(user => {
         const matchesGender = genderFilter === 'all' || user.gender === genderFilter
         const matchesType = typeFilter === 'all' || user.type === typeFilter
         const city = user.location.split(', ')[0]
         const matchesLocation = city.toLowerCase().startsWith(searchText.toLowerCase())
-
         return matchesGender && matchesType && matchesLocation
-    })
-
+    }).sort((a, b) => b.score - a.score)
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -90,15 +158,28 @@ export default function Matching() {
             {/* user cards */}
             <div className="px-6 py-4 grid grid-cols-3 gap-4">
                 {filtered.map(user => (
-                    <div key={user.name} className="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg mb-3">
-                            {user.letter}
+                    <div key={user.id} className="bg-white rounded-xl shadow-sm p-4 border border-gray-200 flex flex-col gap-1">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg shrink-0">
+                                {user.letter}
+                            </div>
+                            <div>
+                                <p className="font-semibold text-gray-800">{user.name}</p>
+                                <p className="text-xs text-gray-400">{user.location}</p>
+                            </div>
+                            <span className="ml-auto text-sm font-bold text-blue-600">{user.score}%</span>
                         </div>
-                        <p className="font-semibold text-gray-800">{user.name}</p>
-                        <p className="text-sm text-gray-500">{user.location}</p>
-                        <p className="text-sm text-gray-500">Gender: {user.gender}</p>
-                        <p className="text-sm text-gray-500">Type: {user.type}</p>
-                        <p className="text-sm text-gray-500 mt-1">Budget: {user.budget}</p>
+                        <div className="flex gap-2 flex-wrap">
+                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.gender}</span>
+                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.type}</span>
+                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.budget}</span>
+                        </div>
+                        <button
+                            onClick={() => window.location.href = '/messages'}
+                            className="mt-3 w-full bg-blue-600 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
+                        >
+                            Message
+                        </button>
                     </div>
                 ))}
             </div>
