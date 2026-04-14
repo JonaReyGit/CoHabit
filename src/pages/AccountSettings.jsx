@@ -15,9 +15,11 @@ import {
   Calendar, 
   CalendarDayButton
 } from '@/components/ui/calendar'
+import Footer from "@/components/shared/Footer"
 
 function AccountSettings() {
   const [form_prof, setFormProf] = useState({
+                                    email: "",
                                     full_name: "", 
                                     avatar_url: "", 
                                     bio: "", 
@@ -64,12 +66,13 @@ function AccountSettings() {
 
       const { data, error } = await supabase 
       .from("profiles")
-      .select("full_name, avatar_url, bio, date_of_birth, gender, phone, location_city, location_state")
+      .select("email, full_name, avatar_url, bio, date_of_birth, gender, phone, location_city, location_state")
       .eq("id", user.id)
       .single();
 
       if (data) {
         setFormProf({
+                  email: data.email || null,
                   full_name: data.full_name || null, 
                   avatar_url: data.avatar_url || null, 
                   bio: data.bio || null, 
@@ -126,6 +129,7 @@ function AccountSettings() {
     const { error } = await supabase
     .from('profiles')
     .update({
+        email: form_prof.email,
         full_name: form_prof.full_name,
         bio: form_prof.bio,
         gender: form_prof.gender,
@@ -584,11 +588,41 @@ function AccountSettings() {
             </TabsContent>
 
             <TabsContent value="account">
-              {/* account fields here */}
+              {
+                <div className='grid grid-cols-2 gap-30 items-start'>
+                  <div>
+                    <EditableField
+                      label="Email"
+                      value={form_prof.email}
+                      placeholder="Enter your new email"
+                      onConfirm={async (val) => {
+                        const { error } = await supabase.auth.updateUser({ email: val });
+                        if (error) console.error(error);
+                        else alert("Check your new email for a confirmation link!");
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <EditableField
+                    label="Password"
+                    inputType="password"
+                    value=""
+                    placeholder="Enter new password"
+                    onConfirm={async (val) => {
+                      const { error } = await supabase.auth.updateUser({ password: val });
+                      if (error) console.error(error);
+                      else alert("Password updated!");
+                    }}
+                    />
+                  </div>
+                </div>}
             </TabsContent>
           </Tabs>
         </div>  
       </div>
+    </div>
+    <div>
+      <Footer />
     </div>
     </>
   )
