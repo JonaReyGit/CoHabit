@@ -8,6 +8,13 @@ import {
 import {
   Slider 
 } from '@/components/ui/slider' 
+import {
+  Checkbox
+} from '@/components/ui/checkbox'
+import {
+  Calendar, 
+  CalendarDayButton
+} from '@/components/ui/calendar'
 
 function AccountSettings() {
   const [form_prof, setFormProf] = useState({
@@ -23,14 +30,16 @@ function AccountSettings() {
   const [form_preferences, setFormPreferences] = useState({
                                                   budget_min: null, 
                                                   budget_max: null, 
-                                                  preferred_location: "", 
+                                                  preferred_location: null, 
                                                   move_in_date: null, 
                                                   cleanliness: null, 
                                                   noise_level: null, 
-                                                  sleep_schedule: "",
+                                                  sleep_schedule: null,
+                                                  guests_frequency: null,
                                                   smoking: null,
                                                   pets: null,
-                                                  deal_breakers: "",
+                                                  property_type: null,
+                                                  deal_breakers: null,
     })
 
   const US_STATES = [
@@ -93,8 +102,10 @@ function AccountSettings() {
                   cleanliness: data.cleanliness || null, 
                   noise_level: data.noise_level || null, 
                   sleep_schedule: data.sleep_schedule || null,
+                  guests_frequency: data.guests_frequency || null,
                   smoking: data.smoking || null,
                   pets: data.pets || null,
+                  property_type: data.property_type || null,
                   deal_breakers: data.deal_breakers || null,
         });
       }
@@ -151,9 +162,13 @@ function AccountSettings() {
         cleanliness: form_preferences.cleanliness, 
         noise_level: form_preferences.noise_level, 
         sleep_schedule: form_preferences.sleep_schedule,
+        guests_frequency: form_preferences.guests_frequency,
         smoking: form_preferences.smoking,
         pets: form_preferences.pets,
-        deal_breakers: form_preferences.deal_breakers
+        property_type: form_preferences.property_type,
+        deal_breakers: typeof form_preferences.deal_breakers === "string"
+                                                                ? form_preferences.deal_breakers.split(",").map(s => s.trim()).filter(Boolean)
+                                                                : form_preferences.deal_breakers ?? null,
     })
     .eq('user_id', user.id)
 
@@ -166,7 +181,7 @@ function AccountSettings() {
     setLoading(false)
   }
 
-  function EditableField({ label, value, onConfirm, placeholder, inputType = "text", options = [] }) {
+  function EditableField({ label, value, onConfirm, placeholder, renderDisplay, inputType = "text", options = [] }) {
     useEffect(() => {
       if (!isEditing) {
         setTemp(value);
@@ -177,6 +192,7 @@ function AccountSettings() {
     const [temp, setTemp] = useState(value);
 
     const handleConfirm = () => {
+      console.log("Confirming temp value:", temp);
       setIsEditing(false);
       onConfirm(temp);
     };
@@ -219,17 +235,44 @@ function AccountSettings() {
           return (
             <div>
               <span className='text-md my-6'>{temp}/5</span>
-          <Slider
-            className={"bg-gray-200 hover:cursor-grabbing my-2 hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
-            min={1}
-            max={5}
-            step={1}
-            value={[temp]}
-            onValueChange={(val) => setTemp(val[0])}
-          />
+              <Slider
+                className={"bg-gray-200 hover:cursor-grabbing my-2 hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
+                min={1}
+                max={5}
+                step={1}
+                value={[temp]}
+                onValueChange={(val) => setTemp(val[0])}
+              />
+            </div>
+          );
+        }
+
+        if (inputType == "checkbox") {
+          return (
+            <div>
+              <Checkbox
+                className="hover:cursor-pointer"
+                id={label}
+                checked={temp}
+                onCheckedChange={(val) => setTemp(val)}
+              />
           </div>
           );
         }
+
+        if (inputType == "calendar") {
+          return (
+            <div>
+              <Calendar
+              className="rounded-md border"
+              mode="single"
+              selected={temp}
+              onSelect={(val) => setTemp(val)}
+              />
+          </div>
+          );
+        }
+
 
       // default: text, email, number, date, etc.
       return (
@@ -261,7 +304,9 @@ function AccountSettings() {
         </>
       ) : (
         <div className="flex flex-col items-start justify-between">
-          <span className="bg-gray-200 rounded-xl px-3 py-2 items-center flex-cent">{value}</span>
+           {renderDisplay ? renderDisplay(value) : (
+            <span className="bg-gray-200 rounded-xl px-3 py-2">{value}</span>
+          )}
           <button type="button" 
           onClick={() => setIsEditing(true)}
           className="w-fit my-2 px-2 bg-gray-400 text-white rounded-md hover:bg-gray-700 hover: cursor-pointer disabled:opacity-50"
@@ -379,7 +424,7 @@ function AccountSettings() {
 
             <TabsContent value="preferences">
               {<form onSubmit={(e) => { e.preventDefault(); savePreferences() }} className="space-y-4">
-                <div className='grid grid-cols-2 gap-30 items-start'>
+                <div className='grid grid-cols-2 gap-20 items-start'>
                   <div>
                     <EditableField
                       inputType="number"
@@ -391,6 +436,7 @@ function AccountSettings() {
                   </div>
                   <div>
                     <EditableField
+                      inputType="number"
                       label="Budget Max"
                       value={form_preferences.budget_max}
                       placeholder="1500"
@@ -415,6 +461,104 @@ function AccountSettings() {
                     />
                   </div>
 
+                  <div>
+                    <EditableField
+                      label="Sleep Schedule"
+                      inputType='select'
+                      options={[
+                      { value: "Early Bird", label: "Early Bird" },
+                      { value: "Night Owl", label: "Night Owl" },
+                      { value: "No Preference", label: "No Preference" },
+                    ]}
+                      value={form_preferences.sleep_schedule}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, sleep_schedule: val })}
+                    />
+                  </div>
+
+                  <div>
+                    <EditableField
+                      label="Guest Frequency"
+                      inputType='select'
+                      options={[
+                      { value: "Never", label: "Never" },
+                      { value: "Sometimes", label: "Sometimes" },
+                      { value: "Often", label: "Often" },
+                      { value: "No Preference", label: "No Preference" },
+                    ]}
+                      value={form_preferences.guests_frequency}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, guests_frequency: val })}
+                    />
+                  </div>
+
+                  <div>
+                    <EditableField
+                    inputType='checkbox'
+                      label="pets"
+                      value={form_preferences.pets}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, pets: val })}
+                      renderDisplay={(val) => (
+                      <input type="checkbox" checked={!!val} readOnly className="hover:cursor-pointer" />
+                    )}
+                    />
+                  </div>
+
+                  <div>
+                    <EditableField
+                    inputType='checkbox'
+                      label="smoking"
+                      value={form_preferences.smoking}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, smoking: val })}
+                      renderDisplay={(val) => (
+                      <input type="checkbox" checked={!!val} readOnly className="hover:cursor-pointer" />
+                    )}
+                    />
+                  </div>
+
+                  <div>
+                    <EditableField
+                      label="Preferred Location"
+                      value={form_preferences.preferred_location}
+                      placeholder="Enter your preferred location"
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, preferred_location: val })}
+                    />
+                  </div>
+
+                  <div>
+                    <EditableField
+                    inputType='calendar'
+                      label="Move-in Date"
+                      value={form_preferences.move_in_date}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, move_in_date: val })}
+                      renderDisplay={(val) => (
+                      <span className="bg-gray-200 rounded-xl px-3 py-2">
+                        {val ? new Date(val).toLocaleDateString() : "Not set"}
+                      </span>
+                      )}
+                    />
+                  </div>
+
+                  <div>
+                    <EditableField
+                      label="Property Type"
+                      inputType='select'
+                      options={[
+                      { value: "Condo", label: "Condo" },
+                      { value: "Apartment", label: "Apartment" },
+                      { value: "House", label: "House" },
+                    ]}
+                      value={form_preferences.property_type}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, property_type: val })}
+                    />
+                  </div>
+
+                  <div>
+                    <EditableField
+                      label="Deal-Breakers"
+                      value={form_preferences.deal_breakers}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, deal_breakers: val })}
+                    />
+                  </div>
+
                   <button
                 type="submit"
                 className="border-black py-3 px-5 text-white bg-blue-500 rounded-2xl hover:bg-blue-600">Submit</button>
@@ -427,9 +571,7 @@ function AccountSettings() {
               {/* account fields here */}
             </TabsContent>
           </Tabs>
-        </div>
-
-        
+        </div>  
       </div>
     </div>
     </>
