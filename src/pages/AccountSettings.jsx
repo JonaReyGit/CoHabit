@@ -517,7 +517,7 @@ function AccountSettings() {
                   <div>
                     <EditableField
                     inputType='checkbox'
-                      label="pets"
+                      label="Pets"
                       value={form_preferences.pets}
                       onConfirm={(val) => setFormPreferences({ ...form_preferences, pets: val })}
                       renderDisplay={(val) => (
@@ -529,7 +529,7 @@ function AccountSettings() {
                   <div>
                     <EditableField
                     inputType='checkbox'
-                      label="smoking"
+                      label="Smoking"
                       value={form_preferences.smoking}
                       onConfirm={(val) => setFormPreferences({ ...form_preferences, smoking: val })}
                       renderDisplay={(val) => (
