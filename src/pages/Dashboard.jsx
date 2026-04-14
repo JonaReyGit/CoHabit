@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
+import d_a_img from "@/assets/images/default-avatar.png";
+
 // const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/6/67/User_Avatar.png"
-const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/9/98/Avatar_for_duckmather.png"
+const DEFAULT_AVATAR = d_a_img
 
 
 function Dashboard() {
