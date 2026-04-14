@@ -651,6 +651,7 @@ function AccountSettings() {
         </div>  
       </div>
     </div>
+    
     <div>
       <Footer />
     </div>
