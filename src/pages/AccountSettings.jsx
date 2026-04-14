@@ -610,8 +610,12 @@ function AccountSettings() {
                     placeholder="Enter new password"
                     onConfirm={async (val) => {
                       const { error } = await supabase.auth.updateUser({ password: val });
-                      if (error) console.error(error);
-                      else alert("Password updated!");
+                      if (!error) {
+                      await supabase
+                      .from('users') // your table name
+                      .update({ email: val })
+                      .eq('id', user.id);
+                     }
                     }}
                     />
                   </div>
