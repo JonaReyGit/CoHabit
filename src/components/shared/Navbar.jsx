@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
+import d_a_img from "@/assets/images/default-avatar.png";
+import logo_img from "@/assets/images/Logo.svg";
+
 // const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/6/67/User_Avatar.png"
-const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/9/98/Avatar_for_duckmather.png"
-const LOGO = "https://upload.wikimedia.org/wikipedia/commons/d/d9/Noun_Project_house_icon_475319_cc_%28Wikiarabia_2022%29.svg"
+const DEFAULT_AVATAR = d_a_img
+const LOGO = logo_img
 
 function Navbar({ onSignOut }) {
   const navigate = useNavigate()
@@ -28,10 +31,7 @@ function Navbar({ onSignOut }) {
 
 
   // get user profile from Supabase
-  const [profile, setProfile] = useState({  name: 'Guest',
-                                            email: 'placeholder@gmail.com',
-                                            picture: DEFAULT_AVATAR,
-  })
+  const [profile, setProfile] = useState(null)
 
   const getUserProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -51,14 +51,6 @@ function Navbar({ onSignOut }) {
         })
       }
     } 
-    
-    // when signed out
-    if (!user) {
-      setProfile({  name: 'Guest', 
-                    email: 'placeholder@gmail.com', 
-                    picture: DEFAULT_AVATAR })
-      return
-    }
   }
 
   useEffect(() => {
@@ -104,10 +96,10 @@ function Navbar({ onSignOut }) {
                       bg-gray-200 dark:bg-gray-900
                       text-orange-700 dark:text-white 
                       shadow-md px-6 py-4 flex justify-between items-center
-                      border-b border-gray-400 dar:border-gray-400">
+                      border-b border-gray-400 dark:border-gray-400">
       <h1
         className="text-xl font-bold cursor-pointer inline-flex items-center gap-2"
-        onClick={() => navigate('/homepage')}
+        onClick={() => navigate('/')}
       >
         <img 
           src={LOGO}
@@ -195,11 +187,11 @@ function Navbar({ onSignOut }) {
 
                 <li>
                   <button
-                    onClick={() => navTo('/messaging')}
+                    onClick={() => navTo('/messages')}
                     className=" w-full text-left px-4 py-2 
                               hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
-                    Messaging
+                    Messages
                   </button>
                 </li>
 
