@@ -1,121 +1,280 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import { supabase } from "../lib/supabase"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 
-const FAKE_CONVOS = [
-  { id: 1, name: "Alex Johnson", avatar: "", lastMsg: "Hey, are you free tomorrow?", time: "2m" },
-  { id: 2, name: "Sam Rivera", avatar: "", lastMsg: "The apartment looks great!", time: "1h" },
-  { id: 3, name: "Jordan Lee", avatar: "", lastMsg: "Let me know about the lease", time: "3h" },
-  { id: 4, name: "Taylor Kim", avatar: "", lastMsg: "Thanks for the info!", time: "1d" },
-]
-
-const FAKE_MESSAGES = [
-  { id: 1, sender: "them", text: "Hey! I saw your listing on coHabit", time: "10:30 AM" },
-  { id: 2, sender: "them", text: "Is the room still available?", time: "10:31 AM" },
-  { id: 3, sender: "me", text: "Hi! Yes it is, want to schedule a visit?", time: "10:45 AM" },
-  { id: 4, sender: "them", text: "That would be great! How about Saturday?", time: "10:46 AM" },
-  { id: 5, sender: "me", text: "Saturday works. 2pm?", time: "11:00 AM" },
-  { id: 6, sender: "them", text: "Perfect, see you then!", time: "11:02 AM" },
-]
-
 export default function Messages() {
-  const [selected, setSelected] = useState(FAKE_CONVOS[0])
+  const [currentUser, setCurrentUser] = useState(null)
+  const [conversations, setConversations] = useState([])
+  const [selected, setSelected] = useState(null)
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
+  const messagesEndRef = useRef(null)
+
+  // fetch current user
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser(session.user.id)
+      }
+    })
+  }, [])
+
+  // Loads convos of accepted matches
+  useEffect(() => {
+    if (!currentUser) return
+
+    async function loadConversations() {
+
+      // get all accepted matches where current user is involved
+      const { data: matches, error } = await supabase
+        .from("matches")
+        .select("id, user_id_1, user_id_2, compatibility_score")
+        .eq("status", "accepted")
+        .or(`user_id_1.eq.${currentUser},user_id_2.eq.${currentUser}`)
+
+      if (error || !matches) return
+
+      // figure out the other users id for each match
+      const otherUserIds = matches.map((m) =>
+        m.user_id_1 === currentUser ? m.user_id_2 : m.user_id_1
+      )
+
+      // fetch their profiles
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .in("id", otherUserIds)
+
+      const profileMap = {}
+      profiles?.forEach((p) => (profileMap[p.id] = p))
+
+      // builds the conversation list
+      const convos = matches.map((m) => {
+        const otherId = m.user_id_1 === currentUser ? m.user_id_2 : m.user_id_1
+        const profile = profileMap[otherId] || {}
+        return {
+          matchId: m.id,
+          otherUserId: otherId,
+          name: profile.full_name || "Unknown",
+          avatar: profile.avatar_url || "",
+          score: m.compatibility_score,
+        }
+      })
+
+      setConversations(convos)
+    }
+
+    loadConversations()
+  }, [currentUser])
+
+  // Loads the messages for each conversation
+  useEffect(() => {
+    if (!selected || !currentUser) return
+
+    async function loadMessages() {
+      const { data } = await supabase
+        .from("messages")
+        .select("*")
+        .or(
+          `and(sender_id.eq.${currentUser},receiver_id.eq.${selected.otherUserId}),and(sender_id.eq.${selected.otherUserId},receiver_id.eq.${currentUser})`
+        )
+        .order("created_at", { ascending: true })
+
+      if (data) setMessages(data)
+    }
+
+    loadMessages()
+  }, [selected, currentUser])
+
+  // auto scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  // Send Message function
+  async function handleSend(e) {
+    e.preventDefault()
+    if (!input.trim() || !selected) return
+
+    const newMsg = {
+      sender_id: currentUser,
+      receiver_id: selected.otherUserId,
+      content: input.trim(),
+    }
+
+    const { data, error } = await supabase
+      .from("messages")
+      .insert(newMsg)
+      .select()
+      .single()
+
+    if (!error && data) {
+      setMessages((prev) => [...prev, data])
+      setInput("")
+    }
+  }
+
+  // Real Time messages subscription
+  useEffect(() => {
+    if (!currentUser) return
+
+    const channel = supabase
+      .channel("messages-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `receiver_id=eq.${currentUser}`,
+        },
+        (payload) => {
+          const newMsg = payload.new
+
+          // only add if from the currently selected conversation
+          if (selected && newMsg.sender_id === selected.otherUserId) {
+            setMessages((prev) => {
+
+              // handles duplications
+              if (prev.some((m) => m.id === newMsg.id)) return prev
+              return [...prev, newMsg]
+            })
+          }
+        }
+      )
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [currentUser, selected])
+
+  function formatTime(timestamp) {
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    })
+  }
+
+  function getInitials(name) {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+  }
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar - conversation list */}
+
+      {/* Sidebar chat lists */}
       <div className="w-80 border-r flex flex-col">
         <div className="p-4">
           <h2 className="text-lg font-semibold">Messages</h2>
         </div>
         <Separator />
         <ScrollArea className="flex-1">
-          {FAKE_CONVOS.map((convo) => (
+          {conversations.length === 0 && (
+            <p className="p-4 text-sm text-muted-foreground">
+              No matches yet. Once you match with someone, you can message them here.
+            </p>
+          )}
+          {conversations.map((convo) => (
             <div
-              key={convo.id}
+              key={convo.matchId}
               onClick={() => setSelected(convo)}
               className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/50 transition-colors ${
-                selected.id === convo.id ? "bg-muted" : ""
+                selected?.matchId === convo.matchId ? "bg-muted" : ""
               }`}
             >
               <Avatar>
                 <AvatarImage src={convo.avatar} />
-                <AvatarFallback>{convo.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
+                <AvatarFallback>{getInitials(convo.name)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline">
-                  <p className="font-medium text-sm">{convo.name}</p>
-                  <span className="text-xs text-muted-foreground">{convo.time}</span>
-                </div>
-                <p className="text-sm text-muted-foreground truncate">{convo.lastMsg}</p>
+                <p className="font-medium text-sm">{convo.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {convo.score}% match
+                </p>
               </div>
             </div>
           ))}
         </ScrollArea>
       </div>
 
-      {/* Main chat area */}
+      {/* main chat area */}
       <div className="flex-1 flex flex-col">
-        {/* Chat header */}
-        <div className="flex items-center gap-3 p-4 border-b">
-          <Avatar>
-            <AvatarFallback>{selected.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-semibold">{selected.name}</p>
-            <p className="text-xs text-muted-foreground">Online</p>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            {FAKE_MESSAGES.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                    msg.sender === "me"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
-                >
-                  <p className="text-sm">{msg.text}</p>
-                  <p className={`text-xs mt-1 ${
-                    msg.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"
-                  }`}>
-                    {msg.time}
-                  </p>
-                </div>
+        {selected ? (
+          <>
+            {/* chat head */}
+            <div className="flex items-center gap-3 p-4 border-b">
+              <Avatar>
+                <AvatarImage src={selected.avatar} />
+                <AvatarFallback>{getInitials(selected.name)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">{selected.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {selected.score}% compatible
+                </p>
               </div>
-            ))}
-          </div>
-        </ScrollArea>
+            </div>
 
-        {/* Input */}
-        <div className="p-4 border-t">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              setInput("")
-            }}
-            className="flex gap-2"
-          >
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a message..."
-              className="flex-1"
-            />
-            <Button type="submit">Send</Button>
-          </form>
-        </div>
+            {/* messages */}
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${
+                      msg.sender_id === currentUser
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[70%] px-4 py-2 shadow-sm ${
+                        msg.sender_id === currentUser
+                          ? "bg-blue-500 text-white rounded-2xl rounded-br-md"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md"
+                      }`}
+                    >
+                      <p className="text-sm">{msg.content}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          msg.sender_id === currentUser
+                            ? "text-blue-100"
+                            : "text-gray-400 dark:text-gray-500"
+                        }`}
+                      >
+                        {formatTime(msg.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            {/* input */}
+            <div className="p-4 border-t">
+              <form onSubmit={handleSend} className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1"
+                />
+                <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">Send</Button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            Select a conversation to start chatting
+          </div>
+        )}
       </div>
     </div>
   )
