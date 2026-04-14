@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import Footer from "@/components/shared/Footer";
 
 export default function Matching() {
     const [genderFilter, setGenderFilter] = useState('all')
@@ -184,6 +185,7 @@ export default function Matching() {
                 ))}
             </div>
 
+            <Footer />
         </div>
     )
 }
