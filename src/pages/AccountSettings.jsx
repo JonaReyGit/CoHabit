@@ -2,18 +2,15 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
   Tabs, TabsContent, TabsList, TabsTrigger 
 } from '@/components/ui/tabs'
 
+import {
+  Slider 
+} from '@/components/ui/slider' 
 
 function AccountSettings() {
-  const [form, setForm] = useState({
+  const [form_prof, setFormProf] = useState({
                                     full_name: "", 
                                     avatar_url: "", 
                                     bio: "", 
@@ -23,6 +20,18 @@ function AccountSettings() {
                                     location_city: "", 
                                     location_state: ""})
 
+  const [form_preferences, setFormPreferences] = useState({
+                                                  budget_min: null, 
+                                                  budget_max: null, 
+                                                  preferred_location: "", 
+                                                  move_in_date: null, 
+                                                  cleanliness: null, 
+                                                  noise_level: null, 
+                                                  sleep_schedule: "",
+                                                  smoking: null,
+                                                  pets: null,
+                                                  deal_breakers: "",
+    })
 
   const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
@@ -36,27 +45,6 @@ function AccountSettings() {
   "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
   "West Virginia", "Wisconsin", "Wyoming"
 ];
-
-  const [full_name, setFullName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [bio, setBio] = useState('')
-  const [gender, setGender] = useState('')
-  const [date_of_birth, setDob] = useState(null)
-  const [location_city, setCity] = useState('')
-  const [location_state, setState] = useState('')
-
-
-  // preferences stuff
-  const [budgetMin, setBudgetMin] = useState('')
-  const [budgetMax, setBudgetMax] = useState('')
-  const [preferredLocation, setPreferredLocation] = useState('')
-  const [moveInDate, setMoveInDate] = useState('')
-  const [cleanliness, setCleanliness] = useState(3)
-  const [noiseLevel, setNoiseLevel] = useState(3)
-  const [sleep_schedule, setSleepSchedule] = useState('')
-  const [guests_frequency, setGuestFrequency] = useState('')
-  const [smoking, setSmoking] = useState(false)
-  const [pets, setPets] = useState(false)
   
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(null);
@@ -72,15 +60,15 @@ function AccountSettings() {
       .single();
 
       if (data) {
-        setForm({
-                  full_name: data.full_name || "", 
-                  avatar_url: data.avatar_url || "", 
-                  bio: data.bio || "", 
+        setFormProf({
+                  full_name: data.full_name || null, 
+                  avatar_url: data.avatar_url || null, 
+                  bio: data.bio || null, 
                   date_of_birth: data.date_of_birth || null, 
-                  gender: data.gender || "", 
-                  phone: data.phone || "", 
-                  location_city: data.location_city || "", 
-                  location_state: data.location_state || "",
+                  gender: data.gender || null, 
+                  phone: data.phone || null, 
+                  location_city: data.location_city || null, 
+                  location_state: data.location_state || null,
         });
       }
       setLoading(false)
@@ -93,21 +81,21 @@ function AccountSettings() {
       const { data, error } = await supabase 
       .from("preferences")
       .select("budget_min, budget_max, preferred_location, move_in_date, cleanliness, noise_level, sleep_schedule, guests_frequency, smoking, pets, deal_breakers, property_type")
-      .eq("id", user.id)
-      .single();
+      .eq("user_id", user.id)
+      .maybeSingle();
 
       if (data) {
-        setForm({
+        setFormPreferences({
                   budget_min: data.budget_min || null, 
                   budget_max: data.budget_max || null, 
                   preferred_location: data.preferred_location || null, 
                   move_in_date: data.move_in_date || null, 
                   cleanliness: data.cleanliness || null, 
                   noise_level: data.noise_level || null, 
-                  sleep_schedule: data.sleep_schedule || "",
+                  sleep_schedule: data.sleep_schedule || null,
                   smoking: data.smoking || null,
                   pets: data.pets || null,
-                  deal_breakers: data.deal_breakers || "",
+                  deal_breakers: data.deal_breakers || null,
         });
       }
       setLoading(false)
@@ -127,13 +115,13 @@ function AccountSettings() {
     const { error } = await supabase
     .from('profiles')
     .update({
-        full_name: form.full_name,
-        bio: form.bio,
-        gender: form.gender,
-        phone: form.phone,
-        location_city: form.location_city,
-        location_state: form.location_state,
-        date_of_birth: form.date_of_birth
+        full_name: form_prof.full_name,
+        bio: form_prof.bio,
+        gender: form_prof.gender,
+        phone: form_prof.phone,
+        location_city: form_prof.location_city,
+        location_state: form_prof.location_state,
+        date_of_birth: form_prof.date_of_birth
     })
     .eq('id', user.id)
 
@@ -156,18 +144,18 @@ function AccountSettings() {
     const { error } = await supabase
     .from('preferences')
     .update({
-        budget_min: form.budget_min, 
-        budget_max: form.budget_max, 
-        preferred_location: form.preferred_location, 
-        move_in_date: form.move_in_date, 
-        cleanliness: form.cleanliness, 
-        noise_level: form.noise_level, 
-        sleep_schedule: form.sleep_schedule,
-        smoking: form.smoking,
-        pets: form.pets,
-        deal_breakers: form.deal_breakers
+        budget_min: form_preferences.budget_min, 
+        budget_max: form_preferences.budget_max, 
+        preferred_location: form_preferences.preferred_location, 
+        move_in_date: form_preferences.move_in_date, 
+        cleanliness: form_preferences.cleanliness, 
+        noise_level: form_preferences.noise_level, 
+        sleep_schedule: form_preferences.sleep_schedule,
+        smoking: form_preferences.smoking,
+        pets: form_preferences.pets,
+        deal_breakers: form_preferences.deal_breakers
     })
-    .eq('id', user.id)
+    .eq('user_id', user.id)
 
     if (error) {
       console.error("Supabase error:", error.message);
@@ -225,20 +213,23 @@ function AccountSettings() {
           })}
           </select>
         );
+      }
 
-        if (inputType == "number") {
+      if (inputType == "slider") {
           return (
-        <input
-          type={inputType}
-          value={temp}
-          onKeyDown={e => { if (e.key === 'Enter') handleConfirm(); }}
-          onChange={e => setTemp(e.target.value)}
-          placeholder={placeholder}
-          className="mt-2 w-full border rounded-lg px-3 py-2"
-        />
+            <div>
+              <span className='text-md my-6'>{temp}/5</span>
+          <Slider
+            className={"bg-gray-200 hover:cursor-grabbing my-2 hover:border-2 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-200"}
+            min={1}
+            max={5}
+            step={1}
+            value={[temp]}
+            onValueChange={(val) => setTemp(val[0])}
+          />
+          </div>
           );
         }
-      }
 
       // default: text, email, number, date, etc.
       return (
@@ -305,17 +296,17 @@ function AccountSettings() {
                   <div>
                     <EditableField
                       label="Full Name"
-                      value={form.full_name}
+                      value={form_prof.full_name}
                       placeholder="Enter your name"
-                      onConfirm={(val) => setForm({ ...form, full_name: val })}
+                      onConfirm={(val) => setFormProf({ ...form_prof, full_name: val })}
                     />
                   </div>
                   <div>
                     <EditableField
                       label="Phone Number"
-                      value={form.phone}
+                      value={form_prof.phone}
                       placeholder="Enter your phone"
-                      onConfirm={(val) => setForm({ ...form, phone: val })}
+                      onConfirm={(val) => setFormProf({ ...form_prof, phone: val })}
                     />
                   </div>
                 </div>
@@ -324,9 +315,9 @@ function AccountSettings() {
                   <EditableField
                       label="Bio"
                       inputType="textarea"
-                      value={form.bio}
+                      value={form_prof.bio}
                       placeholder="Enter your bio"
-                      onConfirm={(val) => setForm({ ...form, bio: val })}
+                      onConfirm={(val) => setFormProf({ ...form_prof, bio: val })}
                     />
                 </div>
 
@@ -341,9 +332,9 @@ function AccountSettings() {
                       { value: "Other", label: "Other" },
                       { value: "Prefer not to say", label: "Prefer not to say" },
                     ]}
-                      value={form.gender}
+                      value={form_prof.gender}
                       placeholder="Enter your phone"
-                      onConfirm={(val) => setForm({ ...form, gender: val })}
+                      onConfirm={(val) => setFormProf({ ...form_prof, gender: val })}
                     />
                   </div>
 
@@ -351,9 +342,9 @@ function AccountSettings() {
                     <EditableField
                       label="Date of Birth"
                       inputType="date"
-                      value={form.date_of_birth}
+                      value={form_prof.date_of_birth}
                       placeholder="Enter your phone"
-                      onConfirm={(val) => setForm({ ...form, date_of_birth: val })}
+                      onConfirm={(val) => setFormProf({ ...form_prof, date_of_birth: val })}
                     />
                   </div>
                 </div>
@@ -362,9 +353,9 @@ function AccountSettings() {
                   <div>
                     <EditableField
                       label="City"
-                      value={form.location_city}
+                      value={form_prof.location_city}
                       placeholder="Enter your city"
-                      onConfirm={(val) => setForm({ ...form, location_city: val })}
+                      onConfirm={(val) => setFormProf({ ...form_prof, location_city: val })}
                     />
                   </div>
 
@@ -373,9 +364,9 @@ function AccountSettings() {
                       label="State"
                       inputType='select'
                       options={US_STATES}
-                      value={form.location_state}
+                      value={form_prof.location_state}
                       placeholder="Enter your state"
-                      onConfirm={(val) => setForm({ ...form, location_state: val })}
+                      onConfirm={(val) => setFormProf({ ...form_prof, location_state: val })}
                     />
                   </div>
                 </div>
@@ -393,17 +384,34 @@ function AccountSettings() {
                     <EditableField
                       inputType="number"
                       label="Budget Min."
-                      value={form.budget_min}
+                      value={form_preferences.budget_min}
                       placeholder="700"
-                      onConfirm={(val) => setForm({ ...form, budget_min: val })}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, budget_min: val })}
                     />
                   </div>
                   <div>
                     <EditableField
                       label="Budget Max"
-                      value={form.budget_max}
+                      value={form_preferences.budget_max}
                       placeholder="1500"
-                      onConfirm={(val) => setForm({ ...form, budget_max: val })}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, budget_max: val })}
+                    />
+                  </div>
+                  <div>
+                  <EditableField
+                      inputType="slider"
+                      label="Cleanliness"
+                      value={form_preferences.cleanliness}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, cleanliness: val })}
+                    />
+                  </div>
+
+                  <div>
+                  <EditableField
+                      inputType="slider"
+                      label="Noise Level"
+                      value={form_preferences.noise_level}
+                      onConfirm={(val) => setFormPreferences({ ...form_preferences, noise_level: val })}
                     />
                   </div>
 
