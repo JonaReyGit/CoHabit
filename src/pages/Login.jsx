@@ -30,7 +30,7 @@ function Login() {
       if (isSignUp) {
         navigate('/setup')
       } else {
-        navigate('/')
+        navigate('/dashboard')
       }
     }
     setLoading(false)
