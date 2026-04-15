@@ -5,7 +5,6 @@ import { defineConfig } from "eslint/config";
 
 export default defineConfig([
   {
-    ignores: ["src/components/ui/**"],
     ignores: ["dist/**", "src/components/ui/**"],
   },
 
