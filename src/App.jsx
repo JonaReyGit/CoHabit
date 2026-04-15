@@ -43,7 +43,7 @@ function App() {
             <ProfileSetup />
           </ProtectedRoute>
         } />
-        <Route path="/" element={
+        <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
