@@ -229,8 +229,10 @@ export default function Messages() {
             <div
               key={convo.matchId}
               onClick={() => setSelected(convo)}
-              className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/50 transition-colors ${
-                selected?.matchId === convo.matchId ? "bg-muted" : ""
+              className={`flex items-center gap-3 p-3 mx-3 my-2 cursor-pointer border rounded-xl transition-all ${
+                selected?.matchId === convo.matchId
+                  ? "bg-blue-50 dark:bg-gray-800 border-blue-300 dark:border-blue-700 shadow-sm"
+                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-blue-200 dark:hover:border-gray-700 hover:shadow-sm"
               }`}
             >
               <Avatar>
