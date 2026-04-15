@@ -170,6 +170,38 @@ export default function Messages() {
       setMessages([])
     }
   }
+   /*
+  ===============================
+  REAL TIME TESTING BLOCk // Remove
+  before adding to production
+  ===============================
+  */
+
+  // Test function to simulate receiving a message
+  async function handleTestReceive() {
+    if (!selected || !currentUser) {
+      alert("Please select a conversation to test message receiving.");
+      return;
+    }
+
+    const testMessage = {
+      // sim message from the other user
+      sender_id: selected.otherUserId, 
+      //// Sent to you
+      receiver_id: currentUser,       
+      content: `:::TEST:: This is a simulated incoming message at ${new Date().toLocaleTimeString()}.`,
+    };
+
+    const { error } = await supabase.from("messages").insert(testMessage);
+
+    if (error) {
+      console.error("Test receive error:", error);
+      alert(
+        "Failed to create test message. This is likely due to your Row Level Security (RLS) policy. Please see the explanation on how to temporarily adjust it for testing."
+      );
+    }
+    // If successful, the realtime subscription will pick it up and add it to the UI.
+  }
 
   // Send Message function
   async function handleSend(e) {
@@ -307,6 +339,15 @@ export default function Messages() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+              {/* Testing button */}
+                <Button
+                  onClick={handleTestReceive}
+                  variant="outline"
+                  size="sm"
+                  className="h-auto px-3 py-1 text-xs border-dashed"
+                >
+                  Test Receive
+                </Button>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="h-auto px-3 py-1 text-xs">
