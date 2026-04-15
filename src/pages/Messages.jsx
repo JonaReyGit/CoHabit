@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import SimpleFooter from "@/components/shared/SimpleFooter";
 
 export default function Messages() {
   const [currentUser, setCurrentUser] = useState(null)
@@ -209,7 +210,8 @@ export default function Messages() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-65px)] overflow-hidden bg-background">
+    <div className="flex flex-col h-[calc(100vh-65px)]">
+      <div className="flex flex-1 overflow-hidden bg-background">
 
       {/* Sidebar chat lists */}
       <div className="w-80 border-r flex flex-col">
@@ -327,6 +329,8 @@ export default function Messages() {
           </div>
         )}
       </div>
+    </div>
+      <SimpleFooter />
     </div>
   )
 }
