@@ -423,7 +423,7 @@ export default function Messages() {
                   onClick={() => handleDeleteConversation(selected.matchId)}
                   className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto"
                 >
-                  Delete Chat
+                  Unmatch
                 </Button>
               </div>
             </div>
