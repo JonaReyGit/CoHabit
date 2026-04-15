@@ -27,7 +27,6 @@ export default defineConfig([
     },
     rules: {
       "react/react-in-jsx-scope": "off",
-      "no-unused-vars": ["error", { "varsIgnorePattern": "^[A-Z]" }],
     },
   },
 ]);
