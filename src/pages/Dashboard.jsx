@@ -7,6 +7,8 @@ import d_a_img from "@/assets/images/default-avatar.png";
 // const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/6/67/User_Avatar.png"
 const DEFAULT_AVATAR = d_a_img
 
+import SimpleFooter from "@/components/shared/SimpleFooter";
+
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -149,85 +151,86 @@ return (
       <div className="absolute bottom-[5%] left-[5%] w-72 h-72 bg-orange-300/40 dark:bg-orange-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float pointer-events-none"></div>
 
       {/* Bottom Right Blob */}
-<div className="absolute bottom-[5%] right-[5%] w-96 h-96 bg-yellow-300/40 dark:bg-yellow-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float animation-delay-2000 pointer-events-none"></div>
+      <div className="absolute bottom-[5%] right-[5%] w-96 h-96 bg-yellow-300/40 dark:bg-yellow-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float animation-delay-2000 pointer-events-none"></div>
 
       {/* foreground */}
       <div className="relative z-10 w-full flex flex-col items-center justify-center px-4">
         <header className="text-center mb-12">
-      <h1 className=" text-4xl font-bold mb-5 
-                    text-gray-900 dark:text-white">
-        Welcome Back <span style={{ color: "#e37e56" }}>{profile.name}</span>!
-      </h1>
-      <h2 className="text-gray-700 dark:text-gray-400">
-        Lets find you some compatible roommates through smart matching
-      </h2>
-    </header>
+          <h1 className=" text-4xl font-bold mb-5 
+                        text-gray-900 dark:text-white">
+            Welcome Back <span style={{ color: "#e37e56" }}>{profile.name}</span>!
+          </h1>
+          <h2 className="text-gray-700 dark:text-gray-400">
+            Lets find you some compatible roommates through smart matching
+          </h2>
+        </header>
 
-    {/* holder for all the pages to navigate */}
-    <div className="bg-gray-700 dark:bg-gray-900 
-                    rounded-lg shadow p-8 text-center">
-      
-      {/* profile page */}
-      <div className="flex gap-6 justify-center flex-wrap">
-        <div
-          className="border border-gray-200 dark:border-gray-700
-                      bg-white dark:bg-gray-500
-                      rounded-xl p-6 w-72 cursor-pointer 
-                      hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow"
-          onClick={() => navigate('/profile')}
-        >
-          <p className="font-bold text-center mb-3 
-                      text-black dark:text-white">Account Settings</p>
-          <div className="flex items-center gap-6">
-            <img
-              src={profile.picture}
-              alt="Profile"
-              className="w-18 h-18 rounded-full object-cover 
-                        bg-gray-200 dark:bg-gray-700"
-              onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR }}
-            />
-            <div className="flex flex-col text-left text-sm">
-              <span className="font-medium 
-                              text-gray-700 dark:text-gray-900">{profile.name}</span>
-              <span className="text-gray-500 dark:text-gray-700">{profile.city}, {profile.state}</span>
-            </div>
+        {/* holder for all the pages to navigate */}
+        <div className="bg-gray-700 dark:bg-gray-900 
+                        rounded-lg shadow p-8 text-center">
+          
+          {/* profile page */}
+          <div className="flex gap-6 justify-center flex-wrap">
+              <div
+                className="border border-gray-200 dark:border-gray-700
+                            bg-white dark:bg-gray-500
+                            rounded-xl p-6 w-72 cursor-pointer 
+                            hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow"
+                onClick={() => navigate('/profile')}
+              >
+                <p className="font-bold text-center mb-3 
+                            text-black dark:text-white">Account Settings</p>
+                <div className="flex items-center gap-6">
+                  <img
+                    src={profile.picture}
+                    alt="Profile"
+                    className="w-18 h-18 rounded-full object-cover 
+                              bg-gray-200 dark:bg-gray-700"
+                    onError={(e) => { e.currentTarget.src = DEFAULT_AVATAR }}
+                  />
+                  <div className="flex flex-col text-left text-sm">
+                    <span className="font-medium 
+                                    text-gray-700 dark:text-gray-900">{profile.name}</span>
+                    <span className="text-gray-500 dark:text-gray-700">{profile.city}, {profile.state}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* messages page */}
+              <div
+                className="relative border border-gray-200 dark:border-gray-700 
+                            rounded-xl p-6 w-72 cursor-pointer 
+                            bg-white dark:bg-gray-500
+                            hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow 
+                            text-left"
+                onClick={() => navigate('/messages')}
+              >
+                {unreadCount > 0 && (
+                  <div className="absolute -top-3 -right-3 bg-red-500 text-white text-sm font-bold w-8 h-8 flex items-center justify-center rounded-full shadow-md border-2 border-white dark:border-gray-900">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </div>
+                )}
+                <p className="font-bold mb-3 text-center text-black dark:text-white">My Messages</p>
+                <p className="text-gray-700 dark:text-gray-900 text-sm">Lets See Who Wants to Chat!</p>
+              </div>
+
+              {/* matching page */}
+              <div
+                className="border border-gray-200 dark:border-gray-700 
+                            rounded-xl p-6 w-72 cursor-pointer 
+                            bg-white dark:bg-gray-500
+                            hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow 
+                            text-left"
+                onClick={() => navigate('/matching')}
+              >
+                <p className="font-bold mb-3 text-center text-black dark:text-white">Start CoHabiting</p>
+                <p className="text-gray-700 dark:text-gray-900 text-sm">Lets get you connected!</p>
+              </div>
           </div>
-        </div>
-
-        {/* messages page */}
-        <div
-          className="relative border border-gray-200 dark:border-gray-700 
-                      rounded-xl p-6 w-72 cursor-pointer 
-                      bg-white dark:bg-gray-500
-                      hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow 
-                      text-left"
-          onClick={() => navigate('/messages')}
-        >
-          {unreadCount > 0 && (
-            <div className="absolute -top-3 -right-3 bg-red-500 text-white text-sm font-bold w-8 h-8 flex items-center justify-center rounded-full shadow-md border-2 border-white dark:border-gray-900">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </div>
-          )}
-          <p className="font-bold mb-3 text-center text-black dark:text-white">My Messages</p>
-          <p className="text-gray-700 dark:text-gray-900 text-sm">Lets See Who Wants to Chat!</p>
-        </div>
-
-        {/* matching page */}
-        <div
-          className="border border-gray-200 dark:border-gray-700 
-                      rounded-xl p-6 w-72 cursor-pointer 
-                      bg-white dark:bg-gray-500
-                      hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow 
-                      text-left"
-          onClick={() => navigate('/matching')}
-        >
-          <p className="font-bold mb-3 text-center text-black dark:text-white">Start CoHabiting</p>
-          <p className="text-gray-700 dark:text-gray-900 text-sm">Lets get you connected!</p>
         </div>
       </div>
     </div>
-      </div>
-  </div>
+  <SimpleFooter />
   </>
 )}
 

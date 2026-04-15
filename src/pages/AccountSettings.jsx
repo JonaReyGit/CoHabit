@@ -15,7 +15,7 @@ import {
   Calendar, 
   CalendarDayButton
 } from '@/components/ui/calendar'
-import Footer from "@/components/shared/Footer"
+import SimpleFooter from "@/components/shared/SimpleFooter";
 
  const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
@@ -664,9 +664,7 @@ function AccountSettings() {
       </div>
     </div>
 
-    <div>
-      <Footer />
-    </div>
+    <SimpleFooter />
     </>
   )
 }

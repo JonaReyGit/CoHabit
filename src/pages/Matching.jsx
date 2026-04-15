@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import Footer from "@/components/shared/Footer";
+import SimpleFooter from "@/components/shared/SimpleFooter";
 
 export default function Matching() {
     const navigate = useNavigate()
@@ -215,7 +215,7 @@ export default function Matching() {
                 ))}
             </div>
 
-            <Footer />
+            <SimpleFooter />
         </div>
     )
 }
