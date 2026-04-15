@@ -318,7 +318,7 @@ export default function Messages() {
       <div className="flex flex-1 overflow-hidden bg-background min-h-0">
 
       {/* Sidebar chat lists */}
-      <div className="w-80 border-r flex flex-col">
+      <div className="w-80 border-r flex flex-col bg-[#659af6] dark:bg-gray-800">
         <div className="p-4">
           <h2 className="text-lg font-semibold">Messages</h2>
         </div>
@@ -336,8 +336,8 @@ export default function Messages() {
                 onClick={() => setSelected(convo)}
                 className={`flex items-center gap-3 p-3 mx-3 my-2 cursor-pointer border rounded-xl transition-all ${
                   selected?.matchId === convo.matchId
-                    ? "bg-blue-50 dark:bg-gray-800 border-blue-300 dark:border-blue-700 shadow-sm"
-                    : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-blue-200 dark:hover:border-gray-700 hover:shadow-sm"
+                    ? "bg-white dark:bg-gray-500 border-black dark:border-white shadow-sm"
+                    : "bg-blue-300 dark:bg-gray-700 border-gray-200 dark:border-black hover:border-blue-700 dark:hover:border-gray-400 hover:shadow-sm"
                 }`}
               >
                 <Avatar>
@@ -364,7 +364,7 @@ export default function Messages() {
       </div>
 
       {/* main chat area */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-700">
         {selected ? (
           <>
             {/* chat head */}
@@ -396,7 +396,7 @@ export default function Messages() {
                 </Button>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-auto px-3 py-1 text-xs">
+                    <Button variant="outline" size="sm" className="h-auto px-3 py-1 text-xs hover:border-blue-700 dark:hover:border-gray-400">
                       View Profile
                     </Button>
                   </DialogTrigger>
@@ -472,7 +472,7 @@ export default function Messages() {
                   placeholder="Type a message..."
                   className="flex-1"
                 />
-                <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">Send</Button>
+                <Button type="submit" className="bg-blue-500 hover:bg-blue-600 hover:border-blue-700 text-white">Send</Button>
               </form>
             </div>
           </>
