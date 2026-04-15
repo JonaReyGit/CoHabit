@@ -206,6 +206,12 @@ function AccountSettings() {
   const [loading, setLoading] = useState(null);
   const [newPassword, setNewPassword] = useState("");
   const confirmPasswordRef = useRef(null);
+  const [toast, setToast] = useState('');
+
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(''), 3000); // disappears after 3s
+  };
 
   useEffect(() => {
     async function fetchProfile() {
@@ -437,13 +443,21 @@ function AccountSettings() {
                     />
                   </div>
                 </div>
+
+                {toast && (
+                <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity">
+                  {toast}
+                </div>
+              )}
               
                   <div>
                     <button
                     type="submit"
+                    onClick={() => showToast("Changes Submitted!")}
                     className="py-3 px-5 text-white bg-blue-500 dark:bg-gray-800 dark:hover:bg-gray-900 rounded-2xl hover:bg-blue-600 hover:cursor-pointer">
                     Submit
                     </button>
+
                   </div>
               </form>}
             </TabsContent>
@@ -584,10 +598,17 @@ function AccountSettings() {
                       onConfirm={(val) => setFormPreferences({ ...form_preferences, deal_breakers: val })}
                     />
                   </div>
+
+                  {toast && (
+                  <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity">
+                    {toast}
+                  </div>
+                  )}
                   
                   <div>
                     <button
                     type="submit"
+                    onClick={() => showToast("Changes Submitted!")}
                     className="py-3 px-5 text-white bg-blue-500 dark:bg-gray-800 dark:hover:bg-gray-900 rounded-2xl hover:bg-blue-600 hover:cursor-pointer">
                       Submit
                       </button>
