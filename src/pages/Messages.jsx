@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import SimpleFooter from "@/components/shared/SimpleFooter";
 
 export default function Messages() {
@@ -60,7 +68,7 @@ export default function Messages() {
       // fetch their profiles
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url")
+        .select("id, full_name, avatar_url, bio, location_city, location_state")
         .in("id", otherUserIds)
 
       const profileMap = {}
@@ -76,6 +84,11 @@ export default function Messages() {
           name: profile.full_name || "Unknown",
           avatar: profile.avatar_url || "",
           score: m.compatibility_score,
+          // bio info in chat
+          bio: profile.bio || "No bio provided.",
+          location: (profile.location_city && profile.location_state)
+            ? `${profile.location_city}, ${profile.location_state}`
+            : "Location not set",
         }
       })
 
@@ -266,14 +279,44 @@ export default function Messages() {
                   <p className="text-xs text-muted-foreground">
                     {selected.score}% compatible
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selected.location}
+                  </p>
                 </div>
               </div>
-              <Button 
-                onClick={() => handleDeleteConversation(selected.matchId)}
-                className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto"
-              >
-                Delete Chat
-              </Button>
+              <div className="flex items-center gap-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-auto px-3 py-1 text-xs">
+                      View Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={selected.avatar} />
+                          <AvatarFallback>{getInitials(selected.name)}</AvatarFallback>
+                        </Avatar>
+                        {selected.name}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {selected.location} • {selected.score}% compatible
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-2">
+                      <h4 className="font-semibold text-sm mb-1">Bio</h4>
+                      <p className="text-sm text-muted-foreground">{selected.bio}</p>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button
+                  onClick={() => handleDeleteConversation(selected.matchId)}
+                  className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto"
+                >
+                  Delete Chat
+                </Button>
+              </div>
             </div>
 
             {/* messages */}
