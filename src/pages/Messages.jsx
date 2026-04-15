@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useLayoutEffect } from "react"
 import { supabase } from "../lib/supabase"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,8 @@ export default function Messages() {
   const [selected, setSelected] = useState(null)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
-  const messagesEndRef = useRef(null)
+  const viewportRef = useRef(null)
+  const scrollAtBottom = useRef(true)
 
   // Keep a ref of the selected chat so we don't have to restart the realtime
   // subscription every single time the user clicks a different conversation.
@@ -117,11 +118,30 @@ export default function Messages() {
     loadMessages()
   }, [selected, currentUser])
 
-  // auto scroll to bottom
+  // This effect sets up a scroll listener on the message viewport.
+  // It updates a ref to track if the user is currently scrolled to the bottom.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    const viewport = viewportRef.current;
+    if (!viewport) return;
 
+    const handleScroll = () => {
+      const isAtBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 50;
+      scrollAtBottom.current = isAtBottom;
+    };
+
+    viewport.addEventListener('scroll', handleScroll);
+    // Reset on conversation change
+
+    scrollAtBottom.current = true; 
+    return () => viewport.removeEventListener('scroll', handleScroll);
+  }, [selected]);
+
+  // This effect runs *after* new messages are rendered to the DOM.
+  useLayoutEffect(() => {
+    if (scrollAtBottom.current && viewportRef.current) {
+      viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+    }
+  }, [messages]);
   // deletes conversation and unmatches
   async function handleDeleteConversation(matchId) {
     if (!window.confirm("Are you sure you want to delete this conversation? This will unmatch you.")) return
@@ -224,7 +244,7 @@ export default function Messages() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-65px)]">
-      <div className="flex flex-1 overflow-hidden bg-background">
+      <div className="flex flex-1 overflow-hidden bg-background min-h-0">
 
       {/* Sidebar chat lists */}
       <div className="w-80 border-r flex flex-col">
@@ -232,39 +252,41 @@ export default function Messages() {
           <h2 className="text-lg font-semibold">Messages</h2>
         </div>
         <Separator />
-        <ScrollArea className="flex-1">
-          {conversations.length === 0 && (
-            <p className="p-4 text-sm text-muted-foreground">
-              No matches yet. Once you match with someone, you can message them here.
-            </p>
-          )}
-          {conversations.map((convo) => (
-            <div
-              key={convo.matchId}
-              onClick={() => setSelected(convo)}
-              className={`flex items-center gap-3 p-3 mx-3 my-2 cursor-pointer border rounded-xl transition-all ${
-                selected?.matchId === convo.matchId
-                  ? "bg-blue-50 dark:bg-gray-800 border-blue-300 dark:border-blue-700 shadow-sm"
-                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-blue-200 dark:hover:border-gray-700 hover:shadow-sm"
-              }`}
-            >
-              <Avatar>
-                <AvatarImage src={convo.avatar} />
-                <AvatarFallback>{getInitials(convo.name)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{convo.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {convo.score}% match
-                </p>
+        <div className="flex-1 relative min-h-0">
+          <ScrollArea className="absolute inset-0">
+            {conversations.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">
+                No matches yet. Once you match with someone, you can message them here.
+              </p>
+            )}
+            {conversations.map((convo) => (
+              <div
+                key={convo.matchId}
+                onClick={() => setSelected(convo)}
+                className={`flex items-center gap-3 p-3 mx-3 my-2 cursor-pointer border rounded-xl transition-all ${
+                  selected?.matchId === convo.matchId
+                    ? "bg-blue-50 dark:bg-gray-800 border-blue-300 dark:border-blue-700 shadow-sm"
+                    : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-blue-200 dark:hover:border-gray-700 hover:shadow-sm"
+                }`}
+              >
+                <Avatar>
+                  <AvatarImage src={convo.avatar} />
+                  <AvatarFallback>{getInitials(convo.name)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{convo.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {convo.score}% match
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </ScrollArea>
+            ))}
+          </ScrollArea>
+        </div>
       </div>
 
       {/* main chat area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {selected ? (
           <>
             {/* chat head */}
@@ -320,40 +342,39 @@ export default function Messages() {
             </div>
 
             {/* messages */}
-            <ScrollArea className="flex-1 p-4">
+            <div ref={viewportRef} className="flex-1 overflow-y-auto p-4 min-h-0">
               <div className="space-y-4">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.sender_id === currentUser
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
+                  {messages.map((msg) => (
                     <div
-                      className={`max-w-[70%] px-4 py-2 shadow-sm ${
+                      key={msg.id}
+                      className={`flex ${
                         msg.sender_id === currentUser
-                          ? "bg-blue-500 text-white rounded-2xl rounded-br-md"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md"
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
-                      <p className="text-sm">{msg.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
+                      <div
+                        className={`max-w-[70%] px-4 py-2 shadow-sm ${
                           msg.sender_id === currentUser
-                            ? "text-blue-100"
-                            : "text-gray-400 dark:text-gray-500"
+                            ? "bg-blue-500 text-white rounded-2xl rounded-br-md"
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md"
                         }`}
                       >
-                        {formatTime(msg.created_at)}
-                      </p>
+                        <p className="text-sm">{msg.content}</p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            msg.sender_id === currentUser
+                              ? "text-blue-100"
+                              : "text-gray-400 dark:text-gray-500"
+                          }`}
+                        >
+                          {formatTime(msg.created_at)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
+                  ))}
               </div>
-            </ScrollArea>
+            </div>
 
             {/* input */}
             <div className="p-4 border-t">
