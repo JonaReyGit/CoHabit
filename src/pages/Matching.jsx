@@ -100,12 +100,12 @@ export default function Matching() {
     }).sort((a, b) => b.score - a.score)
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[#b2dcf1b9]">
 
             {/* header */}
-            <div className="bg-white shadow-sm px-6 py-4">
-                <h1 className="text-2xl font-bold text-gray-800">Find a Roommate</h1>
-                <p className="text-gray-500 text-sm mt-1">Browse and filter potential roommates</p>
+            <div className="bg-[#659af6] px-6 py-16 text-center">
+                <h1 className="text-4xl font-bold text-black">Find a Roommate</h1>
+                <p className="text-gray-900 text-lg mt-2">Browse and filter potential roommates</p>
             </div>
             {/* search and filter */}
             <div className="px-6 py-4 flex flex-col gap-3">
@@ -124,32 +124,32 @@ export default function Matching() {
                 {/* filter buttons row */}
                 <div className="flex gap-2 flex-wrap">
                     <button onClick={() => setGenderFilter('all')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${genderFilter === 'all' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${genderFilter === 'all' ? 'bg-orange-700 text-white border-orange-700' : 'bg-white text-gray-600 border-gray-300'}`}>
                         All
                     </button>
                     <button onClick={() => setGenderFilter('Male')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${genderFilter === 'Male' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${genderFilter === 'Male' ? 'bg-orange-700 text-white border-orange-700' : 'bg-white text-gray-600 border-gray-300'}`}>
                         Male
                     </button>
                     <button onClick={() => setGenderFilter('Female')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${genderFilter === 'Female' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${genderFilter === 'Female' ? 'bg-orange-700 text-white border-orange-700' : 'bg-white text-gray-600 border-gray-300'}`}>
                         Female
                     </button>
                     <div className="w-px bg-gray-300 mx-1" />
                     <button onClick={() => setTypeFilter('all')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'all' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'all' ? 'bg-orange-700 text-white border-orange-700' : 'bg-white text-gray-600 border-gray-300'}`}>
                         All Types
                     </button>
                     <button onClick={() => setTypeFilter('Apartment')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'Apartment' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'Apartment' ? 'bg-orange-700 text-white border-orange-700' : 'bg-white text-gray-600 border-gray-300'}`}>
                         Apartment
                     </button>
                     <button onClick={() => setTypeFilter('House')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'House' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'House' ? 'bg-orange-700 text-white border-orange-700' : 'bg-white text-gray-600 border-gray-300'}`}>
                         House
                     </button>
                     <button onClick={() => setTypeFilter('Condo')}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'Condo' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium border ${typeFilter === 'Condo' ? 'bg-orange-700 text-white border-orange-700' : 'bg-white text-gray-600 border-gray-300'}`}>
                         Condo
                     </button>
                 </div>
@@ -168,12 +168,15 @@ export default function Matching() {
                                 <p className="font-semibold text-gray-800">{user.name}</p>
                                 <p className="text-xs text-gray-400">{user.location}</p>
                             </div>
-                            <span className="ml-auto text-sm font-bold text-blue-600">{user.score}%</span>
+                            <span className="ml-auto text-sm font-bold text-blue-600">{user.score}% Match</span>
                         </div>
                         <div className="flex gap-2 flex-wrap">
                             <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.gender}</span>
                             <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.type}</span>
                             <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.budget}</span>
+                            {user.smoking && <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">🚬 Smoking OK</span>}
+                            {user.pets && <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">🐾 Pets OK</span>}
+
                         </div>
                         <button
                             onClick={() => window.location.href = '/messages'}
