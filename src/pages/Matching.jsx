@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Footer from "@/components/shared/Footer";
 
 export default function Matching() {
+    const navigate = useNavigate()
     const [genderFilter, setGenderFilter] = useState('all')
     const [searchText, setSearchText] = useState('')
     const [typeFilter, setTypeFilter] = useState('all')
@@ -84,6 +86,31 @@ export default function Matching() {
         if (myPreferences.pets === otherUser.pets) score += 15
 
         return score
+    }
+
+    const handleConnect = async (otherUser) => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        // needs to save the match to the database
+        const { error } = await supabase
+            .from('matches')
+            .insert({
+                user_id_1: user.id,
+                user_id_2: otherUser.id,
+                compatibility_score: otherUser.score,
+                status: 'accepted'
+            })
+
+        // Violation error code:23505 is Postgre unique_violation error code
+         
+        // If the match already exists ignore the error and just navigate
+        if (error && error.code !== '23505') {
+            console.error("Error creating match:", error)
+            return
+        }
+
+        navigate('/messages')
     }
 
     const scored = users.map(user => ({
@@ -179,8 +206,8 @@ export default function Matching() {
 
                         </div>
                         <button
-                            onClick={() => window.location.href = '/messages'}
-                            className="mt-3 w-full bg-blue-600 dark:bg-blue-900 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
+                        onClick={() => handleConnect(user)}
+                            className="mt-3 w-full bg-blue-600 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
                         >
                             Message
                         </button>
