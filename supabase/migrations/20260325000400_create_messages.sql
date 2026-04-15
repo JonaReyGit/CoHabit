@@ -21,3 +21,6 @@ create policy "messages: users can send as themselves"
   on public.messages
   for insert
   with check (auth.uid() = sender_id);
+
+-- Enable Realtime for the messages table
+alter publication supabase_realtime add table public.messages;

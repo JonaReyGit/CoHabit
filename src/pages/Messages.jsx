@@ -1,10 +1,19 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useLayoutEffect } from "react"
 import { supabase } from "../lib/supabase"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import SimpleFooter from "@/components/shared/SimpleFooter";
 
 export default function Messages() {
   const [currentUser, setCurrentUser] = useState(null)
@@ -12,7 +21,8 @@ export default function Messages() {
   const [selected, setSelected] = useState(null)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState("")
-  const messagesEndRef = useRef(null)
+  const viewportRef = useRef(null)
+  const scrollAtBottom = useRef(true)
 
   // Keep a ref of the selected chat so we don't have to restart the realtime
   // subscription every single time the user clicks a different conversation.
@@ -59,11 +69,23 @@ export default function Messages() {
       // fetch their profiles
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url")
+        .select("id, full_name, avatar_url, bio, location_city, location_state")
         .in("id", otherUserIds)
 
       const profileMap = {}
       profiles?.forEach((p) => (profileMap[p.id] = p))
+
+      // fetch unread messages count for these conversations
+      const { data: unreadData } = await supabase
+        .from("messages")
+        .select("sender_id")
+        .eq("receiver_id", currentUser)
+        .eq("is_read", false)
+
+      const unreadMap = {}
+      unreadData?.forEach((msg) => {
+        unreadMap[msg.sender_id] = (unreadMap[msg.sender_id] || 0) + 1
+      })
 
       // builds the conversation list
       const convos = matches.map((m) => {
@@ -75,6 +97,12 @@ export default function Messages() {
           name: profile.full_name || "Unknown",
           avatar: profile.avatar_url || "",
           score: m.compatibility_score,
+          // bio info in chat
+          bio: profile.bio || "No bio provided.",
+          location: (profile.location_city && profile.location_state)
+            ? `${profile.location_city}, ${profile.location_state}`
+            : "Location not set",
+          unreadCount: unreadMap[otherId] || 0,
         }
       })
 
@@ -97,17 +125,54 @@ export default function Messages() {
         )
         .order("created_at", { ascending: true })
 
-      if (data) setMessages(data)
+      if (data) {
+        setMessages(data)
+
+        // Mark unread messages as read when we open the conversation
+        const hasUnread = data.some(m => m.receiver_id === currentUser && !m.is_read);
+        if (hasUnread) {
+          await supabase
+            .from('messages')
+            .update({ is_read: true })
+            .eq('receiver_id', currentUser)
+            .eq('sender_id', selected.otherUserId)
+            .eq('is_read', false);
+
+          // Update local conversations state to remove the notification badge
+          setConversations(prev => prev.map(c =>
+            c.matchId === selected.matchId ? { ...c, unreadCount: 0 } : c
+          ));
+        }
+      }
     }
 
     loadMessages()
-  }, [selected, currentUser])
+  }, [selected?.matchId, currentUser])
 
-  // auto scroll to bottom
+  // This effect sets up a scroll listener on the message viewport.
+  // It updates a ref to track if the user is currently scrolled to the bottom.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    const viewport = viewportRef.current;
+    if (!viewport) return;
 
+    const handleScroll = () => {
+      const isAtBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 50;
+      scrollAtBottom.current = isAtBottom;
+    };
+
+    viewport.addEventListener('scroll', handleScroll);
+    // Reset on conversation change
+
+    scrollAtBottom.current = true; 
+    return () => viewport.removeEventListener('scroll', handleScroll);
+  }, [selected]);
+
+  // This effect runs *after* new messages are rendered to the DOM.
+  useLayoutEffect(() => {
+    if (scrollAtBottom.current && viewportRef.current) {
+      viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+    }
+  }, [messages]);
   // deletes conversation and unmatches
   async function handleDeleteConversation(matchId) {
     if (!window.confirm("Are you sure you want to delete this conversation? This will unmatch you.")) return
@@ -135,6 +200,38 @@ export default function Messages() {
       setSelected(null)
       setMessages([])
     }
+  }
+   /*
+  ===============================
+  REAL TIME TESTING BLOCk // Remove
+  before adding to production
+  ===============================
+  */
+
+  // Test function to simulate receiving a message
+  async function handleTestReceive() {
+    if (!selected || !currentUser) {
+      alert("Please select a conversation to test message receiving.");
+      return;
+    }
+
+    const testMessage = {
+      // sim message from the other user
+      sender_id: selected.otherUserId, 
+      //// Sent to you
+      receiver_id: currentUser,       
+      content: `:::TEST:: This is a simulated incoming message at ${new Date().toLocaleTimeString()}.`,
+    };
+
+    const { error } = await supabase.from("messages").insert(testMessage);
+
+    if (error) {
+      console.error("Test receive error:", error);
+      alert(
+        "Failed to create test message. This is likely due to your Row Level Security (RLS) policy. Please see the explanation on how to temporarily adjust it for testing."
+      );
+    }
+    // If successful, the realtime subscription will pick it up and add it to the UI.
   }
 
   // Send Message function
@@ -186,6 +283,14 @@ export default function Messages() {
               if (prev.some((m) => m.id === newMsg.id)) return prev
               return [...prev, newMsg]
             })
+            
+            // Mark it as read immediately since we are viewing this conversation
+            supabase.from('messages').update({ is_read: true }).eq('id', newMsg.id).then();
+          } else {
+            // If it's for another conversation, increment the unread badge
+            setConversations(prev => prev.map(c =>
+              c.otherUserId === newMsg.sender_id ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
+            ))
           }
         }
       )
@@ -209,7 +314,8 @@ export default function Messages() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-65px)] overflow-hidden bg-background">
+    <div className="flex flex-col h-[calc(100vh-65px)]">
+      <div className="flex flex-1 overflow-hidden bg-background min-h-0">
 
       {/* Sidebar chat lists */}
       <div className="w-80 border-r flex flex-col">
@@ -217,37 +323,48 @@ export default function Messages() {
           <h2 className="text-lg font-semibold">Messages</h2>
         </div>
         <Separator />
-        <ScrollArea className="flex-1">
-          {conversations.length === 0 && (
-            <p className="p-4 text-sm text-muted-foreground">
-              No matches yet. Once you match with someone, you can message them here.
-            </p>
-          )}
-          {conversations.map((convo) => (
-            <div
-              key={convo.matchId}
-              onClick={() => setSelected(convo)}
-              className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/50 transition-colors ${
-                selected?.matchId === convo.matchId ? "bg-muted" : ""
-              }`}
-            >
-              <Avatar>
-                <AvatarImage src={convo.avatar} />
-                <AvatarFallback>{getInitials(convo.name)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{convo.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {convo.score}% match
-                </p>
+        <div className="flex-1 relative min-h-0">
+          <ScrollArea className="absolute inset-0">
+            {conversations.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">
+                No matches yet. Once you match with someone, you can message them here.
+              </p>
+            )}
+            {conversations.map((convo) => (
+              <div
+                key={convo.matchId}
+                onClick={() => setSelected(convo)}
+                className={`flex items-center gap-3 p-3 mx-3 my-2 cursor-pointer border rounded-xl transition-all ${
+                  selected?.matchId === convo.matchId
+                    ? "bg-blue-50 dark:bg-gray-800 border-blue-300 dark:border-blue-700 shadow-sm"
+                    : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-blue-200 dark:hover:border-gray-700 hover:shadow-sm"
+                }`}
+              >
+                <Avatar>
+                  <AvatarImage src={convo.avatar} />
+                  <AvatarFallback>{getInitials(convo.name)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-medium text-sm truncate pr-2">{convo.name}</p>
+                    {convo.unreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                        {convo.unreadCount > 99 ? '99+' : convo.unreadCount}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {convo.score}% match
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </ScrollArea>
+            ))}
+          </ScrollArea>
+        </div>
       </div>
 
       {/* main chat area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {selected ? (
           <>
             {/* chat head */}
@@ -262,51 +379,89 @@ export default function Messages() {
                   <p className="text-xs text-muted-foreground">
                     {selected.score}% compatible
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selected.location}
+                  </p>
                 </div>
               </div>
-              <Button 
-                onClick={() => handleDeleteConversation(selected.matchId)}
-                className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto"
-              >
-                Delete Chat
-              </Button>
+              <div className="flex items-center gap-2">
+              {/* Testing button */}
+                <Button
+                  onClick={handleTestReceive}
+                  variant="outline"
+                  size="sm"
+                  className="h-auto px-3 py-1 text-xs border-dashed"
+                >
+                  Test Receive
+                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-auto px-3 py-1 text-xs">
+                      View Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={selected.avatar} />
+                          <AvatarFallback>{getInitials(selected.name)}</AvatarFallback>
+                        </Avatar>
+                        {selected.name}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {selected.location} • {selected.score}% compatible
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-2">
+                      <h4 className="font-semibold text-sm mb-1">Bio</h4>
+                      <p className="text-sm text-muted-foreground">{selected.bio}</p>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button
+                  onClick={() => handleDeleteConversation(selected.matchId)}
+                  className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto"
+                >
+                  Unmatch
+                </Button>
+              </div>
             </div>
 
             {/* messages */}
-            <ScrollArea className="flex-1 p-4">
+            <div ref={viewportRef} className="flex-1 overflow-y-auto p-4 min-h-0">
               <div className="space-y-4">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.sender_id === currentUser
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
+                  {messages.map((msg) => (
                     <div
-                      className={`max-w-[70%] px-4 py-2 shadow-sm ${
+                      key={msg.id}
+                      className={`flex ${
                         msg.sender_id === currentUser
-                          ? "bg-blue-500 text-white rounded-2xl rounded-br-md"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md"
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
-                      <p className="text-sm">{msg.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
+                      <div
+                        className={`max-w-[70%] px-4 py-2 shadow-sm ${
                           msg.sender_id === currentUser
-                            ? "text-blue-100"
-                            : "text-gray-400 dark:text-gray-500"
+                            ? "bg-blue-500 text-white rounded-2xl rounded-br-md"
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md"
                         }`}
                       >
-                        {formatTime(msg.created_at)}
-                      </p>
+                        <p className="text-sm">{msg.content}</p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            msg.sender_id === currentUser
+                              ? "text-blue-100"
+                              : "text-gray-400 dark:text-gray-500"
+                          }`}
+                        >
+                          {formatTime(msg.created_at)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
+                  ))}
               </div>
-            </ScrollArea>
+            </div>
 
             {/* input */}
             <div className="p-4 border-t">
@@ -327,6 +482,8 @@ export default function Messages() {
           </div>
         )}
       </div>
+    </div>
+      <SimpleFooter />
     </div>
   )
 }
