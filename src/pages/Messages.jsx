@@ -166,7 +166,7 @@ export default function Messages() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-[calc(100vh-65px)] overflow-hidden bg-background">
 
       {/* Sidebar chat lists */}
       <div className="w-80 border-r flex flex-col">
