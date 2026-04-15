@@ -57,6 +57,7 @@ function Dashboard() {
   /*
 
 Notification modal for new messages
+FIX: update on click of messages card to update or clear the count
 
   */
 
@@ -117,12 +118,45 @@ if (loading) {
 }
 
 return (
-  <div className="min-h-screen flex flex-col items-center justify-center 
-                bg-gray-50 dark:bg-gray-950">
-    <header className="text-center mb-12">
+  <>
+    <style>
+      {`
+        @keyframes float {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-float {
+          animation: float 15s ease-in-out infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}
+    </style>
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 overflow-hidden">
+      
+      {/* floating orb tailwind ref */}
+      <div className="absolute top-[10%] left-[20%] w-92 h-72 bg-orange-300/60 dark:bg-orange-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-2xl opacity-70 animate-float pointer-events-none"></div>
+      <div className="absolute top-[20%] right-[20%] w-96 h-96 bg-yellow-300/60 dark:bg-yellow-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float animation-delay-2000 pointer-events-none"></div>
+      <div className="absolute bottom-[10%] left-[40%] w-80 h-80 bg-orange-400/60 dark:bg-orange-800/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float animation-delay-4000 pointer-events-none"></div>
+      <div className="absolute top-[20%] left-[40%] w-80 h-80 bg-orange-400/60 dark:bg-orange-800/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float pointer-events-none"></div>
+        {/* bottom left */}
+      <div className="absolute bottom-[5%] left-[5%] w-72 h-72 bg-orange-300/40 dark:bg-orange-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float pointer-events-none"></div>
+
+      {/* Bottom Right Blob */}
+<div className="absolute bottom-[5%] right-[5%] w-96 h-96 bg-yellow-300/40 dark:bg-yellow-900/30 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-70 animate-float animation-delay-2000 pointer-events-none"></div>
+
+      {/* foreground */}
+      <div className="relative z-10 w-full flex flex-col items-center justify-center px-4">
+        <header className="text-center mb-12">
       <h1 className=" text-4xl font-bold mb-5 
                     text-gray-900 dark:text-white">
-        Welcome Back <span style={{ color: "#C2410C" }}>{profile.name}</span>!
+        Welcome Back <span style={{ color: "#e37e56" }}>{profile.name}</span>!
       </h1>
       <h2 className="text-gray-700 dark:text-gray-400">
         Lets find you some compatible roommates through smart matching
@@ -192,7 +226,9 @@ return (
         </div>
       </div>
     </div>
+      </div>
   </div>
+  </>
 )}
 
 export default Dashboard
