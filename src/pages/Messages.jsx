@@ -14,6 +14,13 @@ export default function Messages() {
   const [input, setInput] = useState("")
   const messagesEndRef = useRef(null)
 
+  // Keep a ref of the selected chat so we don't have to restart the realtime
+  // subscription every single time the user clicks a different conversation.
+  const selectedRef = useRef(selected)
+  useEffect(() => {
+    selectedRef.current = selected
+  }, [selected])
+
   // fetch current user
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -37,6 +44,12 @@ export default function Messages() {
         .or(`user_id_1.eq.${currentUser},user_id_2.eq.${currentUser}`)
 
       if (error || !matches) return
+
+      // Error handling for empty array of int
+      if (matches.length === 0) {
+        setConversations([])
+        return
+      }
 
       // figure out the other users id for each match
       const otherUserIds = matches.map((m) =>
@@ -95,6 +108,35 @@ export default function Messages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
+  // deletes conversation and unmatches
+  async function handleDeleteConversation(matchId) {
+    if (!window.confirm("Are you sure you want to delete this conversation? This will unmatch you.")) return
+
+    const { data, error } = await supabase
+      .from("matches")
+      .delete()
+      .eq("id", matchId)
+      .select()
+
+    if (error) {
+      console.error("Error deleting conversation:", error)
+      alert("Could not delete the conversation.")
+      return
+    }
+
+    // If no error occurred but 0 rows were returned, RLS blocked the deletion
+    if (!data || data.length === 0) {
+      alert("Deletion blocked by the database! You need to add a DELETE policy for the 'matches' table in Supabase.")
+      return
+    }
+
+    setConversations((prev) => prev.filter((c) => c.matchId !== matchId))
+    if (selected?.matchId === matchId) {
+      setSelected(null)
+      setMessages([])
+    }
+  }
+
   // Send Message function
   async function handleSend(e) {
     e.preventDefault()
@@ -123,7 +165,7 @@ export default function Messages() {
     if (!currentUser) return
 
     const channel = supabase
-      .channel("messages-realtime")
+      .channel(`messages-${currentUser}`)
       .on(
         "postgres_changes",
         {
@@ -134,12 +176,13 @@ export default function Messages() {
         },
         (payload) => {
           const newMsg = payload.new
+          const currentSelected = selectedRef.current
 
           // only add if from the currently selected conversation
-          if (selected && newMsg.sender_id === selected.otherUserId) {
+          if (currentSelected && newMsg.sender_id === currentSelected.otherUserId) {
             setMessages((prev) => {
 
-              // handles duplications
+              // handles and manage duplications
               if (prev.some((m) => m.id === newMsg.id)) return prev
               return [...prev, newMsg]
             })
@@ -148,8 +191,8 @@ export default function Messages() {
       )
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
-  }, [currentUser, selected])
+    return () => { supabase.removeChannel(channel) }
+  }, [currentUser])
 
   function formatTime(timestamp) {
     return new Date(timestamp).toLocaleTimeString([], {
@@ -208,17 +251,25 @@ export default function Messages() {
         {selected ? (
           <>
             {/* chat head */}
-            <div className="flex items-center gap-3 p-4 border-b">
-              <Avatar>
-                <AvatarImage src={selected.avatar} />
-                <AvatarFallback>{getInitials(selected.name)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">{selected.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {selected.score}% compatible
-                </p>
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarImage src={selected.avatar} />
+                  <AvatarFallback>{getInitials(selected.name)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">{selected.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {selected.score}% compatible
+                  </p>
+                </div>
               </div>
+              <Button 
+                onClick={() => handleDeleteConversation(selected.matchId)}
+                className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 h-auto"
+              >
+                Delete Chat
+              </Button>
             </div>
 
             {/* messages */}
