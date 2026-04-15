@@ -209,6 +209,8 @@ function AccountSettings() {
 
   useEffect(() => {
     async function fetchProfile() {
+
+      setLoading(true)
       const {data: { user } } = await supabase.auth.getUser(); 
 
       const { data, error } = await supabase 
@@ -611,6 +613,11 @@ function AccountSettings() {
                       .from('profiles')
                       .update({ email: val })
                       .eq('id', user.id);
+
+                      setFormProf(prev => ({ ...prev, email: val }));
+                    } else {
+                      console.error("Auth update error:", error.message, error.status);
+                      return;
                     }
                       }}
                     />
