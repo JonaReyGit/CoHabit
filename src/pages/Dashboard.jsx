@@ -18,8 +18,9 @@ function Dashboard() {
                                             state: 'State'
   })
 
-  // handle the flashing default data
+  // handle the flashing data
   const [loading, setLoading] = useState(true)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     const getUserProfile = async () => {
@@ -51,6 +52,59 @@ function Dashboard() {
     }
 
     getUserProfile()
+  }, [])
+
+  /*
+
+Notification modal for new messages
+
+  */
+
+  // get unread count and subscribe to new messages
+  useEffect(() => {
+    let channel;
+    const fetchUnreadAndSubscribe = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return;
+
+      // gets initial count
+
+      const { count } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('receiver_id', user.id)
+        .eq('is_read', false);
+
+      setUnreadCount(count || 0);
+
+      // picks up subscribe changes
+      channel = supabase.channel(`dashboard-messages-${user.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${user.id}`
+        }, (payload) => {
+          if (payload.new.is_read === false) {
+            setUnreadCount(prev => prev + 1);
+          }
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${user.id}`
+        }, (payload) => {
+          if (payload.new.is_read === true && payload.old.is_read === false) {
+            setUnreadCount(prev => Math.max(0, prev - 1));
+          }
+        })
+        .subscribe();
+    };
+
+    fetchUnreadAndSubscribe();
+
+    return () => { if (channel) supabase.removeChannel(channel); }
   }, [])
 
 // so the "Guest" and default values don't flash before the actual user data loads
@@ -108,13 +162,18 @@ return (
 
         {/* messages page */}
         <div
-          className="border border-gray-200 dark:border-gray-700 
+          className="relative border border-gray-200 dark:border-gray-700 
                       rounded-xl p-6 w-72 cursor-pointer 
                       bg-white dark:bg-gray-500
                       hover:shadow-md hover:shadow-slate-400 dark:hover:shadow-gray-700 transition-shadow 
                       text-left"
           onClick={() => navigate('/messages')}
         >
+          {unreadCount > 0 && (
+            <div className="absolute -top-3 -right-3 bg-red-500 text-white text-sm font-bold w-8 h-8 flex items-center justify-center rounded-full shadow-md border-2 border-white dark:border-gray-900">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </div>
+          )}
           <p className="font-bold mb-3 text-center text-black dark:text-white">My Messages</p>
           <p className="text-gray-700 dark:text-gray-900 text-sm">Lets See Who Wants to Chat!</p>
         </div>

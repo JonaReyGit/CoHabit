@@ -75,6 +75,18 @@ export default function Messages() {
       const profileMap = {}
       profiles?.forEach((p) => (profileMap[p.id] = p))
 
+      // fetch unread messages count for these conversations
+      const { data: unreadData } = await supabase
+        .from("messages")
+        .select("sender_id")
+        .eq("receiver_id", currentUser)
+        .eq("is_read", false)
+
+      const unreadMap = {}
+      unreadData?.forEach((msg) => {
+        unreadMap[msg.sender_id] = (unreadMap[msg.sender_id] || 0) + 1
+      })
+
       // builds the conversation list
       const convos = matches.map((m) => {
         const otherId = m.user_id_1 === currentUser ? m.user_id_2 : m.user_id_1
@@ -90,6 +102,7 @@ export default function Messages() {
           location: (profile.location_city && profile.location_state)
             ? `${profile.location_city}, ${profile.location_state}`
             : "Location not set",
+          unreadCount: unreadMap[otherId] || 0,
         }
       })
 
@@ -112,11 +125,29 @@ export default function Messages() {
         )
         .order("created_at", { ascending: true })
 
-      if (data) setMessages(data)
+      if (data) {
+        setMessages(data)
+
+        // Mark unread messages as read when we open the conversation
+        const hasUnread = data.some(m => m.receiver_id === currentUser && !m.is_read);
+        if (hasUnread) {
+          await supabase
+            .from('messages')
+            .update({ is_read: true })
+            .eq('receiver_id', currentUser)
+            .eq('sender_id', selected.otherUserId)
+            .eq('is_read', false);
+
+          // Update local conversations state to remove the notification badge
+          setConversations(prev => prev.map(c =>
+            c.matchId === selected.matchId ? { ...c, unreadCount: 0 } : c
+          ));
+        }
+      }
     }
 
     loadMessages()
-  }, [selected, currentUser])
+  }, [selected?.matchId, currentUser])
 
   // This effect sets up a scroll listener on the message viewport.
   // It updates a ref to track if the user is currently scrolled to the bottom.
@@ -252,6 +283,14 @@ export default function Messages() {
               if (prev.some((m) => m.id === newMsg.id)) return prev
               return [...prev, newMsg]
             })
+            
+            // Mark it as read immediately since we are viewing this conversation
+            supabase.from('messages').update({ is_read: true }).eq('id', newMsg.id).then();
+          } else {
+            // If it's for another conversation, increment the unread badge
+            setConversations(prev => prev.map(c =>
+              c.otherUserId === newMsg.sender_id ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
+            ))
           }
         }
       )
@@ -306,7 +345,14 @@ export default function Messages() {
                   <AvatarFallback>{getInitials(convo.name)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{convo.name}</p>
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-medium text-sm truncate pr-2">{convo.name}</p>
+                    {convo.unreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                        {convo.unreadCount > 99 ? '99+' : convo.unreadCount}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {convo.score}% match
                   </p>
