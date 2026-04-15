@@ -100,7 +100,7 @@ export default function Matching() {
     }).sort((a, b) => b.score - a.score)
 
     return (
-        <div className="min-h-screen bg-[#b2dcf1b9]">
+        <div className="min-h-screen bg-[#b2dcf1b9] dark:bg-gray-900">
 
             {/* header */}
             <div className="bg-[#659af6] px-6 py-16 text-center">
@@ -115,7 +115,7 @@ export default function Matching() {
                         type="text"
                         placeholder="Search by city..."
                         onChange={e => setSearchText(e.target.value)}
-                        className="border border-gray-300 rounded-lg px-4 py-2 w-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="border border-gray-300 rounded-lg px-4 py-2 w-full bg-white dark:bg-gray-200 text-sm dark:text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                     <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
                         Filter
@@ -159,28 +159,28 @@ export default function Matching() {
             {/* user cards */}
             <div className="px-6 py-4 grid grid-cols-3 gap-4">
                 {filtered.map(user => (
-                    <div key={user.id} className="bg-white rounded-xl shadow-sm p-4 border border-gray-200 flex flex-col gap-1">
+                    <div key={user.id} className="bg-white dark:bg-gray-700 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-black flex flex-col gap-1">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg shrink-0">
+                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-gray-400 flex items-center justify-center text-blue-600 font-bold text-lg shrink-0">
                                 {user.letter}
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-800">{user.name}</p>
+                                <p className="font-semibold text-gray-800 dark:text-black">{user.name}</p>
                                 <p className="text-xs text-gray-400">{user.location}</p>
                             </div>
-                            <span className="ml-auto text-sm font-bold text-blue-600">{user.score}% Match</span>
+                            <span className="ml-auto text-sm font-bold text-blue-600 dark:text-gray-300">{user.score}% Match</span>
                         </div>
                         <div className="flex gap-2 flex-wrap">
-                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.gender}</span>
-                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.type}</span>
-                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{user.budget}</span>
-                            {user.smoking && <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">🚬 Smoking OK</span>}
-                            {user.pets && <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">🐾 Pets OK</span>}
+                            <span className="bg-gray-100 dark:bg-gray-500 text-gray-600 dark:text-black text-xs px-2 py-1 rounded-full">{user.gender}</span>
+                            <span className="bg-gray-100 dark:bg-gray-500 text-gray-600 dark:text-black text-xs px-2 py-1 rounded-full">{user.type}</span>
+                            <span className="bg-gray-100 dark:bg-gray-500 text-gray-600 dark:text-black text-xs px-2 py-1 rounded-full">{user.budget}</span>
+                            {user.smoking && <span className="bg-gray-100 dark:bg-gray-500 text-gray-600 dark:text-black text-xs px-2 py-1 rounded-full">🚬 Smoking OK</span>}
+                            {user.pets && <span className="bg-gray-100 dark:bg-gray-500 text-gray-600 dark:text-black text-xs px-2 py-1 rounded-full">🐾 Pets OK</span>}
 
                         </div>
                         <button
                             onClick={() => window.location.href = '/messages'}
-                            className="mt-3 w-full bg-blue-600 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
+                            className="mt-3 w-full bg-blue-600 dark:bg-blue-900 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
                         >
                             Message
                         </button>
